@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.4.33122.133
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DoggoShop", "DoggoShop\DoggoShop.csproj", "{814A2EBB-04AC-448F-BE3F-B6CE39AC2CD8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "WebRazor", "WebRazor\WebRazor.csproj", "{31EA7D65-229E-4B70-A7CE-97D215178161}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{814A2EBB-04AC-448F-BE3F-B6CE39AC2CD8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{814A2EBB-04AC-448F-BE3F-B6CE39AC2CD8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{814A2EBB-04AC-448F-BE3F-B6CE39AC2CD8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{814A2EBB-04AC-448F-BE3F-B6CE39AC2CD8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31EA7D65-229E-4B70-A7CE-97D215178161}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31EA7D65-229E-4B70-A7CE-97D215178161}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31EA7D65-229E-4B70-A7CE-97D215178161}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31EA7D65-229E-4B70-A7CE-97D215178161}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {680C8762-5CCB-42BC-AD66-B4B51AB35D38}
+	EndGlobalSection
+EndGlobal

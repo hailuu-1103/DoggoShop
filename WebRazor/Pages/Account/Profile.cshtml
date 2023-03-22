@@ -1,0 +1,62 @@
+﻿@page
+@model WebRazor.Pages.Account.ProfileModel
+@{
+}
+<div id="content-left">
+    <h3 style="font-weight: normal;">Welcome, @Model.Auth.Email</h3>
+    <h3>Account Management</h3>
+    <ul>
+        <a href="~/Account/Profile">
+        <li>Personal information</li></a>
+    </ul>
+    <h3>My order</h3>
+    <ul>
+        <a href="~/Order">
+        <li>All orders</li></a>
+        <a href="~/Order/Cancle">
+        <li>Canceled order</li></a>
+    </ul>
+</div>
+<div id="content-right">
+        <div class="path">Personal information</b></div>
+        <div class="content-main">
+            
+            <div id="profile-content">
+
+                <div class="profile-content-col">
+                    <div>
+                        Company name: <br />
+                        @Model.Auth.Customer.CompanyName
+                    </div>
+                    <div>
+                        Contact name: <br />
+                        @Model.Auth.Customer.ContactName
+                    </div>
+                    <div>
+                        <a asp-page="/Account/Edit">
+                            <input type="submit" value="Edit info" /><br />
+                        </a>
+                    </div>
+                </div>
+                <div class="profile-content-col">
+                    <div>
+                        Company title: <br />
+                        @Model.Auth.Customer.ContactTitle
+
+                    </div>
+                    <div>
+                        Address: <br />
+                        @Model.Auth.Customer.Address
+                    </div>
+                </div>
+                <div class="profile-content-col">
+
+                    <div>
+                        Email: <br />
+                        @Model.Auth.Email
+                    </div>
+                </div>
+
+            </div>
+        </div>
+</div>

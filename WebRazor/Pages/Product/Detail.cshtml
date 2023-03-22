@@ -1,0 +1,65 @@
+﻿@page "{id:int?}"
+@model WebRazor.Pages.Product.DetailModel
+@{
+}
+<div id="content-detail">
+    <div id="content-title">
+        <a href="~/Index">Home</a> >
+        <a href="~/Index?id=@Model.Product.CategoryId">@Model.Product.Category.CategoryName</a> >
+        @Model.Product.ProductName
+    </div>
+    <div id="product">
+        <div id="product-name">
+            <h2>@Model.Product.ProductName</h2>
+            <div id="product-detail">
+                <div id="product-detail-left">
+                    <div id="product-img">
+                        <img src="~/img/1.jpg" />
+                    </div>
+                    <div id="product-img-items">
+                        <div><a href="#"><img src="~/img/1.jpg" /></a></div>
+                        <div><a href="#"><img src="~/img/1.jpg" /></a></div>
+                        <div><a href="#"><img src="~/img/1.jpg" /></a></div>
+                        <div><a href="#"><img src="~/img/1.jpg" /></a></div>
+                    </div>
+                </div>
+                <div id="product-detail-right">
+                    <div id="product-detail-right-content">
+                        <div id="product-price">$ @Model.Product.UnitPrice</div>
+                        @if (Model.Product.UnitsInStock > 0)
+                        {
+                            <div id="product-status">In stock</div>
+                            <div> <span class="msg-success">@TempData["success"]</span><br /></div>
+                            <div> <span class="msg-error">@TempData["fail"]</span><br /></div>
+                            <div id="product-detail-buttons">
+                                <div id="product-detail-button">
+                                    <a asp-page="/Order/Index" asp-page-handler="Add" asp-route-id="@Model.Product.ProductId">
+                                        <input type="button" value="BUY NOW">
+                                    </a>
+                                    <a asp-page="/Cart/Index" asp-page-handler="Add" asp-route-id="@Model.Product.ProductId">
+                                        <input type="button" value="ADD TO CART" style="background-color: #fff; color:red;border: 1px solid gray;">
+                                    </a>
+
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div id="product-status">Not in stock</div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="info-detail">
+        <div id="info-detail-title">
+            <h2>Information deltail</h2>
+            <div style="margin:10px auto;">
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Illum, debitis. Asperiores soluta eveniet eos accusantium doloremque cum suscipit ducimus enim at sapiente mollitia consequuntur dicta quaerat, sunt voluptates autem. Quam!
+                Lorem ipsum dolor, sit amet consectetur adipisicing elit. Rem illum autem veritatis maxime corporis quod quibusdam nostrum eaque laborum numquam quos unde eveniet aut, exercitationem voluptatum veniam fugiat, debitis esse?
+                Lorem ipsum dolor sit amet consectetur adipisicing elit. Distinctio eligendi ratione vitae nobis numquam dolorum assumenda saepe enim cumque blanditiis, deleniti neque voluptate vel ducimus in omnis harum aut nisi.
+            </div>
+        </div>
+    </div>
+</div>

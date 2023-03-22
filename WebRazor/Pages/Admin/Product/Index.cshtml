@@ -1,0 +1,130 @@
+﻿@page
+@model WebRazor.Pages.Admin.Product.IndexModel
+@{
+}
+<div class="path-admin">PRODUCT LIST</b></div>
+
+<div id="content-main-dashboard">
+    <div id="product-title-header">
+        <form id="filter" style="width: 80%;">
+            <div id="product-title-1">
+                <b>Filter by Catetory:</b><br/>
+                <select name="categoryId">
+                    <option value="0">--- Select ---</option>
+                    @foreach(var item in Model.Categories){
+                        @if(Model.CatId != item.CategoryId){
+                            <option value="@item.CategoryId">@item.CategoryName</option>
+                        } else {
+                            <option value="@item.CategoryId" selected>@item.CategoryName</option>
+                        }
+                        
+                    }
+                </select>
+                <input type="submit" value="Filter">
+            </div>
+            <div id="product-title-2">
+                <input type="text" name="txtSearch" placeholder="Enter product name to search" value="@Model.Search" />
+                <input type="submit" value="Search"/>
+            </div>
+        </form>
+        <div id="product-title-3" style="width: 20%;">
+            <a asp-page="/Admin/Product/Create">Create a new Product</a>
+            <form method="post" enctype='multipart/form-data' style="height: 90px;">
+                <label for="upload-file">Import .xls or .xlsx file</label>
+                <input asp-for="FileUpload" type="file" id="upload-file" />
+                <button type="submit" class="button-form">Import</button>
+                <button type="button" class="button-form" id="Export">Export</button>
+            </form>
+        </div>
+        <style>
+            .button-form{
+                position: relative; 
+                bottom: 50px;
+                width: 80px;
+                height: 28px;
+                margin-left: 10px;
+            }
+        </style>
+        <script type="text/javascript">
+            $("#Export").click(function () {
+                window.location.href = "/Admin/Product?handler=Export";
+            });
+        </script>
+    </div>
+    <div>
+        <span class="msg-error" style="position: relative; bottom: 30px;" asp-validation-for="FileUpload">@ViewData["Fail"]</span>
+        <span class="msg-success" style="position: relative; bottom: 30px;">@ViewData["Success"]</span>
+    </div>
+
+    <div id="order-table-admin">
+        <table id="orders">
+            <tr>
+                <th>ProductID</th>
+                <th>ProductName</th>
+                <th>UnitPrice</th>
+                <th>Unit</th>
+                <th>UnitsInStock</th>
+                <th>Category</th>
+                <th>Discontinued</th>
+                <th></th>
+            </tr>
+            @foreach (var item in Model.Products)
+            {
+                <tr>
+                    <td><a asp-page="/Admin/Product/Edit" asp-route-id="@item.ProductId">#@item.ProductId</a></td>
+                    <td>@item.ProductName</td>
+                    <td>@(((decimal)item.UnitPrice).ToString("G29"))</td>
+                    <td>@item.QuantityPerUnit</td>
+                    <td>@item.UnitsInStock</td>
+                    <td>@item.Category.CategoryName</td>
+                    <td>@item.Discontinued</td>
+                    <td>
+                        <a asp-page="/Admin/Product/Edit" asp-route-id="@item.ProductId">Edit</a> &nbsp; | &nbsp;
+                        <a class="delete" id="@item.ProductId"
+                            asp-page="/Admin/Product/Edit" asp-route-id="@item.ProductId" asp-page-handler="Delete"
+                        >Delete</a>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+    <script type="text/javascript">
+        $(".delete").click(function(){
+            return confirm("Delete product #" + $(this).attr("id") + "?");
+        });
+
+        function getHref(){
+            return window.location.href.split("?")[0];
+        };
+
+        function Submit() {
+            var pdata = new FormData();
+            var files = $("#upload-file").get(0).files;
+            pdata.append('CertImageFile', files[0]);
+            $.ajax({
+                url: getHref() + "/Index",
+                type: "POST",
+                data: pdata,
+                processData: false,
+                contentType: false,
+                success: function (data) {
+                    alert("Hehe");
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    alert(xhr.status);
+                    alert(thrownError);
+                }
+            });
+        }
+    </script>
+    <div id="paging">
+        <div class="pagination">
+            @foreach (var item in Model.PagesLink)
+            {
+                @Html.Raw(item)
+            }
+        </div>
+    </div>
+</div>
+
+

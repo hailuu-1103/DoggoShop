@@ -1,0 +1,70 @@
+﻿@page
+@model WebRazor.Pages.Account.EditModel
+@{
+}
+<div id="content-left">
+    <h3 style="font-weight: normal;">Welcome, @Model.Auth.Email</h3>
+    <h3>Account Management</h3>
+    <ul>
+        <a href="~/Account/Profile">
+        <li>Personal information</li></a>
+    </ul>
+    <h3>My order</h3>
+    <ul>
+        <a href="~/Order">
+        <li>All orders</li></a>
+        <a href="~/Order/Cancle">
+        <li>Canceled order</li></a>
+    </ul>
+</div>
+<div id="content-right">
+    <form method="post">
+        <div class="path">Personal information</b></div>
+        <div class="content-main">
+
+            <div id="profile-content">
+
+                <div class="profile-content-col">
+                    <div>
+                        Company name: <br />
+                        <input type="text" asp-for="Auth.Customer.CompanyName" /><br />
+                        <span class="msg-error" asp-validation-for="Auth.Customer.CompanyName"></span><br />
+                    </div>
+                    <div>
+                        Contact name: <br />
+                        <input type="text" asp-for="Auth.Customer.ContactName" /><br />
+                        <span class="msg-error" asp-validation-for="Auth.Customer.ContactName"></span><br />
+                    </div>
+                    <div>
+                        <input type="submit" value="Edit info" /><br />
+                        <span class="msg-error">@ViewData["fail"]</span><br />
+                        <span class="msg-success">@ViewData["success"]</span><br />
+                    </div>
+                </div>
+                <div class="profile-content-col">
+                    <div>
+                        Company title: <br />
+                        <input type="text" asp-for="Auth.Customer.ContactTitle" /><br />
+                        <span class="msg-error" asp-validation-for="Auth.Customer.ContactTitle"></span><br />
+
+                    </div>
+                    <div>
+                        Address: <br />
+                        <input type="text" asp-for="Auth.Customer.Address" /><br />
+                        <span class="msg-error" asp-validation-for="Auth.Customer.Address"></span><br />
+                    </div>
+                </div>
+                <div class="profile-content-col">
+
+                    <div>
+                        Email: <br />
+                        <input type="text" asp-for="Auth.Email" /><br />
+                        <span class="msg-error" asp-validation-for="Auth.Email"></span><br />
+                    </div>
+                </div>
+                <input type="text" asp-for="Auth.Customer.CustomerId" hidden/><br />
+                <input type="text" asp-for="Auth.AccountId" hidden /><br />
+            </div>
+        </div>
+    </form>
+</div>

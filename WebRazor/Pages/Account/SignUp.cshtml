@@ -1,0 +1,49 @@
+﻿@page
+@model WebRazor.Pages.Account.SignUpModel
+@{
+}
+<div id="form">
+    <div id="form-title">
+        <span><a href="~/Account/SignUp" style="color: red;">SIGN UP</a></span>
+        <span><a href="~/Account/Login">SIGN IN</a></span>
+    </div>
+    <div id="form-content">
+        <span class="msg-error">@ViewData["msg"]</span><br />
+
+        <form method="post">
+            <input asp-for="Customer.CustomerId" value="1" type="hidden" /><br />
+
+            <label>Company name<span style="color: red;">*</span></label><br />
+            <input asp-for="Customer.CompanyName" type="text" /><br />
+            <span class="msg-error" asp-validation-for="Customer.CompanyName"></span><br />
+
+            <label>Contact name<span style="color: red;">*</span></label><br />
+            <input asp-for="Customer.ContactName" type="text" /><br />
+            <span class="msg-error" asp-validation-for="Customer.ContactName"></span><br />
+
+            <label>Contact title<span style="color: red;">*</span></label><br />
+            <input asp-for="Customer.ContactTitle" type="text" /><br />
+            <span class="msg-error" asp-validation-for="Customer.ContactTitle"></span><br />
+
+            <label>Address<span style="color: red;">*</span></label><br />
+            <input asp-for="Customer.Address" type="text" /><br />
+            <span class="msg-error" asp-validation-for="Customer.Address"></span><br />
+
+            <label>Email<span style="color: red;">*</span></label><br />
+            <input asp-for="Account.Email" type="text" /><br />
+            <span class="msg-error" asp-validation-for="Account.Email"></span><br />
+
+            <label>Password<span style="color: red;">*</span></label><br />
+            <input asp-for="Account.Password" type="password" /><br />
+            <span class="msg-error" asp-validation-for="Account.Password"></span><br />
+
+            <label>Re-Password<span style="color: red;">*</span></label><br />
+            <input asp-for="RePassword" type="password" /><br />
+            <span class="msg-error">@ViewData["msg-repassword"]</span><br />
+
+            <div></div>
+            <input type="submit" value="SIGN UP" style="margin-bottom: 30px;" />
+
+        </form>
+    </div>
+</div>

@@ -1,0 +1,55 @@
+﻿@page
+@model WebRazor.Pages.Admin.Customer.IndexModel
+@{
+}
+<div class="path-admin">CUSTOMER LIST</div>
+
+<div id="content-main-dashboard">
+    <div id="product-title-header">
+        <form id="filter" style="width: 80%;">
+            <div id="customer-title-1">
+                <input type="text" name="txtSearch" placeholder="Enter product name to search" value="@Model.Search" />
+                <input type="submit" value="Search" />
+            </div>
+        </form>
+    </div>
+
+    <div id="order-table-admin">
+        <table id="orders">
+            <tr>
+                <th>CustomerId</th>
+                <th>Company Name</th>
+                <th>Contact Name</th>
+                <th>Contact Title</th>
+                <th>Address</th>
+                <th>Create Date</th>
+                <th>Active</th>
+            </tr>
+            @foreach (var cus in Model.Customers)
+            {
+                <tr>
+                    <td>#@cus.CustomerId</td>
+                    <td>@cus.CompanyName</td>
+                    <td>@cus.ContactName</td>
+                    <td>@cus.ContactTitle</td>
+                    <td>@cus.Address</td>
+                    <td>@((cus.CreatedAt == null ? DateTime.Now : (DateTime)cus.CreatedAt).ToString("dd/MM/yyyy"))</td>
+                    <td>
+                        <a class="delete" id="@cus.CustomerId"
+                       asp-page="/Admin/Customer/Index" asp-route-id="@cus.CustomerId" 
+                       asp-page-handler="Active">@((bool)cus.Active ? "Active" : "Deactive")</a>
+                    </td>
+                </tr>
+            }
+        </table>
+    </div>
+
+    <div id="paging">
+        <div class="pagination">
+            @foreach (var item in Model.PagesLink)
+            {
+                @Html.Raw(item)
+            }
+        </div>
+    </div>
+</div>

@@ -1,0 +1,103 @@
+﻿@page
+@model WebRazor.Pages.Order.CancleModel
+@{
+    int getStatus(DateTime? requiredDate, DateTime? shippedDate, int orderId)
+    {
+        if (shippedDate != null)
+        {
+            return 1;
+        }
+
+        if (requiredDate != null)
+        {
+            return 2;
+        }
+
+        return 3;
+    }
+}
+<div id="content-left">
+    <h3 style="font-weight: normal;">Welcome, @Model.Auth.Email</h3>
+    <h3>Account Management</h3>
+    <ul>
+        <a href="~/Account/Profile">
+        <li>Personal information</li></a>
+    </ul>
+    <h3>My order</h3>
+    <ul>
+        <a href="~/Order">
+        <li>All orders</li></a>
+        <a href="~/Order/Cancle">
+        <li>Canceled order</li></a>
+    </ul>
+</div>
+<div id="content-right">
+    <div class="path">LIST ORDERS</b></div>
+    <div class="content-main">
+        <div id="profile-content-order">
+            @foreach (var order in Model.Orders)
+            {
+                <div>
+                    <div class="profile-order-title">
+                        <div class="profile-order-title-left">
+                            <div>Order creation date: @order.OrderDate</div>
+                            <div>Order: <a href="#" class="show">#@order.OrderId</a></div>
+                        </div>
+                        <div class="profile-order-title-right">
+                            @{
+                                int status = getStatus(order.RequiredDate, order.ShippedDate, order.OrderId);
+                                switch (status)
+                                {
+                                    case 1:
+                                        <span style="color: green;">Completed</span>
+                                        break;
+                                    case 2:
+                                        <span style="color: blue;">Pending</span>
+                                        break;
+                                    default:
+                                        <span style='color: red;'>Order canceled</span>
+                                        break;
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div id="@order.OrderId" style="display: none;">
+                        @foreach (var item in order.OrderDetails)
+                        {
+                            <div class="profile-order-content">
+                                <div class="profile-order-content-col1">
+                                    <a href="~/Product/Detail/@item.ProductId"><img src="~/img/1.jpg" width="100%" /></a>
+                                </div>
+                                <div class="profile-order-content-col2">@item.Product.ProductName</div>
+                                <div class="profile-order-content-col3">Quantity: @item.Quantity</div>
+                                <div class="profile-order-content-col4">@item.UnitPrice $</div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+
+        </div>
+        <script type="text/javascript">
+            $(".show").click(function () {
+                var id = $(this).html();
+                if (document.getElementById(id.replace("#", "")).style.display == "none")
+                    document.getElementById(id.replace("#", "")).style.display = "block";
+                else
+                    document.getElementById(id.replace("#", "")).style.display = "none";
+
+            });
+        </script>
+
+    </div>
+
+    <div id="paging">
+        <div class="pagination">
+            @foreach (var item in Model.PagesLink)
+            {
+                @Html.Raw(item)
+            }
+        </div>
+    </div>
+
+</div>

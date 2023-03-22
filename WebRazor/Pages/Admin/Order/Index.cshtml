@@ -1,0 +1,106 @@
+﻿@page "{id:int?}"
+@model WebRazor.Pages.Admin.Order.IndexModel
+@{
+    string format(DateTime? date){
+        if (date == null)
+            return "";
+        return ((DateTime)date).Date.ToString("dd-MM-yyyy");
+    }
+
+    int getStatus(DateTime? requiredDate, DateTime? shippedDate)
+    {
+        if(shippedDate != null){
+            return 1;
+        }
+
+        if(requiredDate != null){
+            return 2;
+        }
+
+        return 3;
+    }
+}
+<div class="path-admin">ORDERS LIST</b></div>
+
+<div id="content-main-dashboard">
+    <div id="order-title">
+        <b>Filter by Order date:</b>
+        <form>
+            From: <input id="startDate" type="date" name="txtStartOrderDate" value="@ViewData["StartDate"]" />
+            To: <input id="endDate" type="date" name="txtEndOrderDate" value="@ViewData["EndDate"]" />
+            <input type="submit" value="Filter">  
+            <button id="Export" type="button">Export</button>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        $("#Export").click(function(){
+            var start = new Date($("#startDate").val());
+            var day = start.getDate();
+            var month = start.getMonth() + 1;
+            var year = start.getFullYear();
+            var startDate = isNaN(year) ? "" : year + "-" + month + "-" + day;
+
+            var end = new Date($("#endDate").val());
+            day = end.getDate();
+            month = end.getMonth() + 1;
+            year = end.getFullYear();
+            var endDate = isNaN(year) ? "" : year + "-" + month + "-" + day;
+
+            window.location.href = "/Admin/Order?handler=Export&txtStartOrderDate=" + startDate + "&txtEndOrderDate=" + endDate;
+        });
+    </script>
+
+    <div id="order-table">
+        <table id="orders">
+            <tr>
+                <th>OrderID</th>
+                <th>OrderDate</th>
+                <th>RequiredDate</th>
+                <th>ShippedDate</th>
+                <th>Employee</th>
+                <th>Customer</th>
+                <th>Freight($)</th>
+                <th>Status</th>
+            </tr>
+            @foreach(var item in Model.Orders){
+                <tr>
+                    <td><a asp-page="/Admin/Order/Detail" asp-route-id="@item.OrderId">#@item.OrderId</a></td>
+                    <td>@format(item.OrderDate)</td>
+                    <td>@format(item.RequiredDate)</td>
+                    <td>@format(item.ShippedDate)</td>
+                    <td>@(item.Employee != null ? (item.Employee.FirstName+ " " +item.Employee.LastName) : "")</td>
+                    <td>@(item.Customer != null ? item.Customer.ContactName : "")</td>
+                    <td>@(((decimal)item.Freight).ToString("G29")) </td>
+                    @{
+                        int status = getStatus(item.RequiredDate, item.ShippedDate);
+                        switch (status)
+                        {
+                            case 1:
+                                                                <td style="color: green;">Completed</td>
+                                break; 
+                            case 2:
+                                                                <td style="color: blue;">Pending | <a asp-page="/Admin/Order/Index"
+                                 asp-route-target="/Admin/Order/Index"
+                                 asp-page-handler="Cancel" asp-route-id="@item.OrderId">Cancel</a>
+                                                                </td>
+                                break;
+                            default:
+                                                                <td style='color: red;'>Order canceled</td>
+                                break;
+                        }
+                    }
+                </tr>
+            }
+        </table>
+    </div>
+    <div id="paging">
+        <div class="pagination">
+
+            @foreach (var item in Model.PagesLink)
+            {
+                @Html.Raw(item)
+            }
+        </div>
+    </div>
+</div>

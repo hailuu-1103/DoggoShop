@@ -1,0 +1,64 @@
+﻿@page "{id:int?}"
+@model WebRazor.Pages.Admin.Order.DetailModel
+@{
+    int getStatus(DateTime? requiredDate, DateTime? shippedDate, int orderId)
+    {
+        if (shippedDate != null)
+        {
+            return 1;
+        }
+
+        if (requiredDate != null)
+        {
+            return 2;
+        }
+
+        return 3;
+    }
+}
+<div class="path-admin">ORDERS DETAIL</b></div>
+
+<div id="content-main-dashboard">
+    <div>
+        <div class="profile-order-title">
+            <div class="profile-order-title-left">
+                <div>OrderID: #@Model.Order.OrderId</div>
+                <div>Order creation date: @(((DateTime)Model.Order.OrderDate).ToString("dd-MM-yyyy"))</div>
+            </div>
+            <div class="profile-order-title-right">
+
+                @{
+                    int status = getStatus(Model.Order.RequiredDate, Model.Order.ShippedDate, Model.Order.OrderId);
+                    switch (status)
+                    {
+                        case 1:
+                            <span style="color: green;">Completed</span>
+                            break;
+                        case 2:
+                            <span style="color: blue;">
+                                Pending | <a asp-page="/Admin/Order/Index"
+                                 asp-route-target="/Admin/Order/Detail/@Model.ID"
+                                 asp-page-handler="Cancel" asp-route-id="@Model.Order.OrderId">Cancel</a>
+                            </span>
+                            break;
+                        default:
+                            <span style='color: red;'>Order canceled</span>
+                            break;
+                    }
+                }
+            </div>
+        </div>
+        @foreach (var item in Model.Order.OrderDetails)
+        {
+            <div class="profile-order-content" style="background-color: white;">
+                <div class="profile-order-content-col1">
+                    <a href="detail.html"><img src="~/img/2.jpg" width="100%" /></a>
+                </div>
+                <div class="profile-order-content-col2">@item.Product.ProductName</div>
+                <div class="profile-order-content-col3">Quantity: @item.Quantity</div>
+                <div class="profile-order-content-col4">@(MathF.Round((float)item.UnitPrice * (float)item.Quantity * (float)(1 - item.Discount), 2, MidpointRounding.ToZero)) $</div>
+            </div>
+        }
+
+    </div>
+</div>

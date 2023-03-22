@@ -1,0 +1,41 @@
+﻿@page "{id:int?}"
+@model WebRazor.Pages.Admin.Product.EditModel
+@{
+}
+<div class="path-admin">PRODUCT EDIT</b></div>
+
+<div> <span class="msg-success">@ViewData["success"]</span><br /></div>
+<form id="content-main-product" method="post">
+    <div class="content-main-1">
+        <label>Product name (*):</label><br />
+        <input type="text" asp-for="Product.ProductName" /><br />
+        <span class="msg-error" asp-validation-for="Product.ProductName"></span><br />
+        <label>Unit price:</label><br />
+        <input type="number" asp-for="Product.UnitPrice" /><br />
+        <label>Quantity per unit:</label><br />
+        <input type="number" asp-for="Product.QuantityPerUnit" /><br />
+        <label>Units in stock (*):</label><br />
+        <input type="number" asp-for="Product.UnitsInStock" /><br />
+        <span class="msg-error" asp-validation-for="Product.ProductName"></span><br />
+    </div>
+    <div class="content-main-1">
+        <label>Category (*):</label><br />
+        <select asp-for="Product.CategoryId">
+            <option disabled selected>--- Select ---</option>
+            @foreach (var item in Model.Categories)
+            {
+                <option value="@item.CategoryId">@item.CategoryName</option>
+            }
+        </select>
+        <br />
+        <span class="msg-error" asp-validation-for="Product.CategoryId"></span><br />
+        <label>Reorder level:</label><br />
+        <input type="number" asp-for="Product.ReorderLevel" disabled /><br />
+        <label>Units on order:</label><br />
+        <input type="number" asp-for="Product.UnitsOnOrder" disabled /><br />
+        <label>Discontinued:</label><br />
+        <input type="checkbox" asp-for="Product.Discontinued" /><br />
+        <input type="submit" value="Save" />
+    </div>
+</form>
+

@@ -1,0 +1,96 @@
+﻿@page "{id:int?}"
+@model WebRazor.Pages.Cart.IndexModel
+@{
+}
+<div id="cart">
+    <div id="cart-title">
+        <h3>SHOPPING CART</h3>
+        <div> <span class="msg-success">@TempData["success"]@ViewData["success"]</span><br /></div>
+        <div> <span class="msg-error">@TempData["fail"]@ViewData["fail"]</span><br /></div>
+    </div>
+    <div id="cart-content">
+        @foreach (var item in Model.Cart)
+        {
+            <div class="cart-item">
+                <div class="cart-item-infor">
+                    <div class="cart-item-img">
+                        <img src="~/img/1.jpg" />
+                    </div>
+                    <div class="cart-item-name">
+                        <a href="~/Product/Detail/@item.Key.ProductId">@item.Key.ProductName</a>
+                    </div>
+                    <div class="cart-item-price">
+                        @item.Key.UnitPrice $
+                    </div>
+                    <div class="cart-item-button">
+                        <a asp-page="/Cart/Index" asp-page-handler="Remove" asp-route-id="@item.Key.ProductId">Remove</a>
+                    </div>
+                </div>
+                <div class="cart-item-function">
+                    <a asp-page="/Cart/Index" asp-page-handler="Down" asp-route-id="@item.Key.ProductId">-</a>
+                    <a asp-page="/Cart/Index" asp-page-handler="Up" asp-route-id="@item.Key.ProductId">+</a>
+                    <input type="text" value="@item.Value" disabled />
+                </div>
+            </div>
+        }
+        
+        
+    </div>
+    <div id="cart-summary">
+        <div id="cart-summary-content">Total amount: <span style="color:red">@Model.Sum $</span></div>
+    </div>
+    <form method="post">
+        <div id="customer-info">
+            <div id="customer-info-content">
+                <h3>CUSTOMER INFORMATION:</h3>
+                <div id="customer-info-detail">
+                    <div id="customer-info-left">
+
+                        <input type="text" placeholder="Company name *" asp-for="Customer.CompanyName"
+                               disabled="@Model.Disable"/><br />
+                        <span class="msg-error" asp-validation-for="Customer.CompanyName"></span><br />
+
+                        <input type="text" placeholder="Contact name *" asp-for="Customer.ContactName"
+                               disabled="@Model.Disable" /><br />
+                        <span class="msg-error" asp-validation-for="Customer.ContactName"></span><br />
+                        <span class="msg-error" asp-validation-for="Customer.CustomerId"></span><br />
+                    </div>
+                    <div id="customer-info-right">
+
+                        <input type="text" placeholder="Contact title *" asp-for="Customer.ContactTitle"
+                               disabled="@Model.Disable" /><br />
+                        <span class="msg-error" asp-validation-for="Customer.ContactTitle"></span><br />
+
+                        <input type="text" placeholder="Address *" asp-for="Customer.Address"
+                               disabled="@Model.Disable" /><br />
+                        <span class="msg-error" asp-validation-for="Customer.Address"></span><br />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <input type="text" asp-for="Customer.CustomerId" style="display: none" />
+        <input type="text" asp-for="Customer.CompanyName" style="display: none" />
+        <input type="text" asp-for="Customer.ContactName" style="display: none" />
+        <input type="text" asp-for="Customer.ContactTitle" style="display: none" />
+        <input type="text" asp-for="Customer.Address" style="display: none" />
+        <div id="customer-info">
+            <div id="customer-info-content">
+                <h3>PAYMENT METHODS:</h3>
+                <div id="customer-info-payment">
+                    <div>
+                        <input type="radio" name="rbPaymentMethod" checked />
+                        Payment C.O.D - Payment on delivery
+                    </div>
+                    <div>
+                        <input type="radio" name="rbPaymentMethod" disabled />
+                        Payment via online payment gateway
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="cart-order">
+            <button type="submit">ORDER</button>
+        </div>
+    </form>
+</div>

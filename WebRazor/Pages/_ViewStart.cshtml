@@ -1,0 +1,10 @@
+﻿@{
+    var check = Context.User.FindFirst(ClaimTypes.Role);
+
+    if (check != null && check.Value.Equals("Employee"))
+    {
+        Layout = "_Layout2";
+    } else {
+        Layout = "_Layout1";
+    }   
+}

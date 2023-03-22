@@ -1,0 +1,62 @@
+﻿@page "{id:int?}"
+@model WebRazor.Pages.Product.ListModel
+@{
+}
+<div id="content-left">
+    <h3>CATEGORY</h3>
+    <ul>
+        @foreach (var item in Model.Categories)
+        {
+            <a asp-page="/Product/List" asp-route-id="@item.CategoryId">
+            <li>@item.CategoryName</li>
+            </a>
+        }
+    </ul>
+</div>
+<div id="content-right">
+    <div class="path">Product</div>
+    <div style="margin: 0px 10px">
+        <label>Price</label>
+        <select name="Sort" id="sort">
+
+            <option value="None" >None</option>
+
+            <option value="Asc">Asc</option>
+
+            <option value="Desc">Desc</option>
+
+        </select>
+    </div>
+
+    <script type="text/javascript">
+        $('#sort').val("@Model.Order") ;
+
+        $('#sort').change(function () {
+            var value = $(this).val();
+            window.location.href = "/Product/List/@Model.Id?order=" + value;
+        });
+
+    </script>
+
+    <div class="content-main">
+        @foreach (var item in Model.Products)
+        {
+            <div class="product">
+                <a asp-page="/Product/Detail" asp-route-id="@item.ProductId"><img src="~/img/1.jpg" /></a>
+                <div class="name"><a asp-page="/Product/Detail" asp-route-id="@item.ProductId">@item.ProductName</a></div>
+                <div class="price">@item.UnitPrice</div>
+                <div><a asp-page="/Order/Index" asp-page-handler="Add" asp-route-id="@item.ProductId">Buy now</a></div>
+            </div>
+        }
+    </div>
+
+    <div id="paging">
+        <div class="pagination">
+            @foreach (var item in Model.PagesLink)
+            {
+                @Html.Raw(item)
+            }
+        </div>
+    </div>
+
+</div>

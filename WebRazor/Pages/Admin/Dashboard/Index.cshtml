@@ -1,0 +1,105 @@
+﻿@page
+@model WebRazor.Pages.Admin.Dashboard.IndexModel
+@{
+}
+<div class="path-admin">DASHBOARD</b></div>
+
+<div id="content-main-dashboard">
+    <div id="order-title">
+        <form>
+            <b>Filter:</b> <input type="date" name="txtDate" value="@ViewData["Date"]" />
+            <input type="submit" value="Filter">
+        </form>
+    </div>
+
+    <div id="dashboard-1">
+        <div id="dashboard-1-container">
+            <div class="dashboard-item">
+                <div class="dashboard-item-title">Weekly Sales</div>
+                <div class="dashboard-item-content">$@MathF.Round((float)Model.WeeklySales, 2, MidpointRounding.ToZero)</div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-item-title">Total Orders</div>
+                <div class="dashboard-item-content">$@MathF.Round((float)Model.TotalSales, 2, MidpointRounding.ToZero)</div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-item-title">Total Customers</div>
+                <div class="dashboard-item-content">@Model.TotalCus</div>
+            </div>
+            <div class="dashboard-item">
+                <div class="dashboard-item-title">Total Guest</div>
+                <div class="dashboard-item-content">@Model.Guest</div>
+            </div>
+        </div>
+    </div>
+    <div id="dashboard-2">
+        <div id="chart" style="text-align: center;">
+            <div id="chart1">
+                <h3>Statistic Orders (Month)</h3>
+                <canvas id="myChart1" style="width: 100%;"></canvas>
+            </div>
+            <div id="chart2">
+                <canvas id="myChart2" style="width: 80%;"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    function OrdersChart() {
+        var xValues = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+        new Chart("myChart1", {
+            type: "line",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    data: [
+                        @Model.StatisticOrders[0],
+                        @Model.StatisticOrders[1], 
+                        @Model.StatisticOrders[2],  
+                        @Model.StatisticOrders[3], 
+                        @Model.StatisticOrders[4], 
+                        @Model.StatisticOrders[5], 
+                        @Model.StatisticOrders[6], 
+                        @Model.StatisticOrders[7], 
+                        @Model.StatisticOrders[8], 
+                        @Model.StatisticOrders[9], 
+                        @Model.StatisticOrders[10], 
+                        @Model.StatisticOrders[11]
+                    ],
+                    borderColor: "sienna",
+                    fill: true
+                }]
+            },
+            options: {
+                legend: { display: false }
+            }
+        });
+    }
+
+    function CustomersChart() {
+        var xValues = ["Total", "New customer"];
+        var yValues = [@Model.TotalCusMonth, @Model.GuestMonth, 0];
+        var barColors = ["green", "red"];
+
+        new Chart("myChart2", {
+            type: "bar",
+            data: {
+                labels: xValues,
+                datasets: [{
+                    backgroundColor: barColors,
+                    data: yValues
+                }]
+            },
+            options: {
+                legend: { display: false },
+                title: {
+                    display: true,
+                    text: "New Customers (30 daily Avg)"
+                }
+            }
+        });
+    }
+
+    OrdersChart();
+    CustomersChart();
+</script>

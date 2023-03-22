@@ -1,0 +1,63 @@
+﻿@page
+@model WebRazor.Pages.IndexModel
+@{
+
+}
+<h1>@ViewData["Send"]</h1>
+<div id="content-left">
+    <h3>CATEGORY</h3>
+    <ul>
+        @foreach (var item in Model.Categories)
+        {
+            <a asp-page="/Product/List" asp-route-id="@item.CategoryId">
+            <li>@item.CategoryName</li>
+            </a>
+        }
+        <li>@ViewData["size"]</li>
+    </ul>
+</div>
+<div id="content-right">
+
+    <div class="path">Hot</div>
+
+    <div class="content-main">
+        @foreach (var item in Model.HotProducts)
+        {
+            <div class="product">
+                <a asp-page="./Product/Detail" asp-route-id="@item.ProductId"><img src="img/1.jpg" /></a>
+                <div class="name"><a asp-page="./Product/Detail" asp-route-id="@item.ProductId">@item.ProductName</a></div>
+                <div class="price">@item.UnitPrice</div>
+                <div><a asp-page="/Order/Index" asp-page-handler="Add" asp-route-id="@item.ProductId">Buy now</a></div>
+            </div>
+        }
+    </div>
+
+    <div class="path">Best Sale</div>
+
+    <div class="content-main">
+        @foreach (var item in Model.BestSaleProducts)
+        {
+            <div class="product">
+                <a asp-page="./Product/Detail" asp-route-id="@item.ProductId"><img src="img/1.jpg" /></a>
+                <div class="name"><a asp-page="./Product/Detail" asp-route-id="@item.ProductId">@item.ProductName</a></div>
+                <div class="price">@item.UnitPrice</div>
+                <div><a asp-page="/Order/Index" asp-page-handler="Add" asp-route-id="@item.ProductId">Buy now</a></div>
+            </div>
+        }
+    </div>
+
+    <div class="path">New Product</div>
+
+    <div class="content-main">
+        @foreach (var item in Model.NewProducts)
+        {
+            <div class="product">
+                <a asp-page="./Product/Detail" asp-route-id="@item.ProductId"><img src="img/1.jpg" /></a>
+                <div class="name"><a asp-page="./Product/Detail" asp-route-id="@item.ProductId">@item.ProductName</a></div>
+                <div class="price">@item.UnitPrice</div>
+                <div><a asp-page="/Order/Index" asp-page-handler="Add" asp-route-id="@item.ProductId">Buy now</a></div>
+            </div>
+        }
+    </div>
+
+</div>
