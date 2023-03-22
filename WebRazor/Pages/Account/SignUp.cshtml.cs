@@ -1,8 +1,11 @@
+using DoggoShopAPI.DTO;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using System.Text.Json;
 using WebRazor.Materials;
 using WebRazor.Models;
 
@@ -11,10 +14,15 @@ namespace WebRazor.Pages.Account
     public class SignUpModel : PageModel
     {
         private readonly PRN221DBContext dbContext;
+        private HttpClient client;
+
+        private string AccountApiUrl = "";
 
         public SignUpModel(PRN221DBContext dbContext)
         {
             this.dbContext = dbContext;
+            this.client = new HttpClient();
+            this.AccountApiUrl = "https://localhost:5000/api/account";
         }
 
         [BindProperty]
@@ -51,10 +59,11 @@ namespace WebRazor.Pages.Account
                 ViewData["msg"] = "This email is exist";
                 return Page();
             }
-
-            var cust = new Customer()
+            var accDTO = new AccountDTO()
             {
-                CustomerId = RandomCustID(5),
+                Email= Account.Email,
+                Password = Account.Password,
+                Role = 2,
                 CompanyName = Customer.CompanyName,
                 ContactName = Customer.ContactName,
                 ContactTitle = Customer.ContactTitle,
@@ -62,36 +71,17 @@ namespace WebRazor.Pages.Account
                 CreatedAt = DateTime.Now,
                 Active = true,
             };
-
-            var newAcc = new Models.Account()
+            var accJson = System.Text.Json.JsonSerializer.Serialize(accDTO);
+            var content = new StringContent(accJson, Encoding.UTF8, "application/json");
+            var accClientRespone = await client.PostAsync(AccountApiUrl, content);
+            if(accClientRespone.IsSuccessStatusCode)
             {
-                Email = Account.Email,
-                Password = HashPassword.Hash(Account.Password),
-                CustomerId = cust.CustomerId,
-                Role = 2,
-            };
-
-            await dbContext.Customers.AddAsync(cust);
-            await dbContext.Accounts.AddAsync(newAcc);
-            await dbContext.SaveChangesAsync();
-
-            return RedirectToPage("/index");
-        }
-
-        private string RandomCustID(int length)
-        {
-            // creating a StringBuilder object()
-            StringBuilder str_build = new StringBuilder();
-            Random random = new Random();
-            char letter;
-            for (int i = 0; i < length; i++)
-            {
-                double flt = random.NextDouble();
-                int shift = Convert.ToInt32(Math.Floor(25 * flt));
-                letter = Convert.ToChar(shift + 65);
-                str_build.Append(letter);
+                return RedirectToPage("/index");
             }
-            return str_build.ToString();
+            else
+            {
+                return RedirectToPage("/register");
+            }
         }
     }
 }

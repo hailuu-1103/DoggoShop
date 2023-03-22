@@ -1,9 +1,12 @@
+using DocumentFormat.OpenXml.Spreadsheet;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Net.Http.Headers;
 using System.Security.Claims;
+using System.Text.Json;
 using WebRazor.Materials;
 using WebRazor.Models;
 
@@ -12,10 +15,15 @@ namespace WebRazor.Pages.Account
     public class LoginModel : PageModel
     {
         private readonly PRN221DBContext dbContext;
+        private readonly HttpClient client;
+        private string AccountApiUrl = "";
 
         public LoginModel(PRN221DBContext dbContext)
         {
             this.dbContext = dbContext;
+            client = new HttpClient();
+            var contentType = new MediaTypeWithQualityHeaderValue("application/json");
+            client.DefaultRequestHeaders.Accept.Add(contentType);
         }
 
         [BindProperty]
@@ -27,8 +35,15 @@ namespace WebRazor.Pages.Account
 
         private async Task<Models.Account?> getAccount()
         {
-            var acc = await dbContext.Accounts.Include(a => a.Customer).Include(a => a.Employee)
-                .SingleOrDefaultAsync(
+            AccountApiUrl = "https://localhost:5000/api/account";
+            var response = await client.GetAsync(AccountApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var userList = JsonSerializer.Deserialize<List<Models.Account>>(data, options).ToList();
+            var acc = userList.SingleOrDefault(
                     a => a.Email.Equals(Account.Email)
                     && a.Password.Equals(HashPassword.Hash(Account.Password)));
 
@@ -126,9 +141,7 @@ namespace WebRazor.Pages.Account
 
         public async Task<IActionResult> OnGetLogout()
         {
-
             await HttpContext.SignOutAsync();
-
             return RedirectToPage("/index");
         }
     }
