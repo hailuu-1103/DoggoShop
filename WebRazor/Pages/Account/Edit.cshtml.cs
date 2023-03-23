@@ -1,31 +1,25 @@
-using DocumentFormat.OpenXml.Spreadsheet;
 using DoggoShopAPI.DTO;
-using ExcelDataReader.Log;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using System.Diagnostics;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Text.Json;
-using WebRazor.Models;
+using WebRazor.Materials;
 
 namespace WebRazor.Pages.Account
 {
     [Authorize(Roles = "Customer")]
     public class EditModel : PageModel
     {
-        private readonly PRN221DBContext dbContext;
         private HttpClient client;
         private string AccountApiUrl = "";
         [BindProperty]
         public Models.Account? Auth { get; set; }
 
-        public EditModel(PRN221DBContext dbContext)
+        public EditModel()
         {
-            this.dbContext = dbContext;
             this.client = new HttpClient();
         }
 
@@ -49,14 +43,30 @@ namespace WebRazor.Pages.Account
             return Page();
         }
 
-        private bool AccountExists(int id)
+        private async Task<bool> AccountExists(int id)
         {
-            return dbContext.Accounts.Any(e => e.AccountId == id);
+            var url = "https://localhost:5000/api/account/isAccountExists/" + id;
+            var response = await client.GetAsync(url);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var result = JsonSerializer.Deserialize<bool>(data, options);
+            return result;
         }
 
-        private bool AccountEmailExists(int id, string? email)
+        private async Task<bool> AccountEmailExists(int id, string? email)
         {
-            return dbContext.Accounts.Any(e => e.Email == email && e.AccountId != id);
+            var url = "https://localhost:5000/api/account/isAccountWithEmailExists/" + id + "/" + email;
+            var response = await client.GetAsync(url);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var result = JsonSerializer.Deserialize<bool>(data, options);
+            return result;
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -79,18 +89,19 @@ namespace WebRazor.Pages.Account
             var accDTO = new AccountDTO()
             {
                 Email = Auth.Email,
-                Password = Auth.Password,
+                Password = HashPassword.Hash(Auth.Password),
                 CompanyName = Auth.Customer.CompanyName,
                 ContactName = Auth.Customer.ContactName,
                 ContactTitle = Auth.Customer.ContactTitle,
                 Address = Auth.Customer.Address,
             };
+            var isAccountWithEmailExists = await this.AccountEmailExists(Auth.AccountId, Auth.Email);
             var accJson = JsonSerializer.Serialize(accDTO);
             AccountApiUrl = "https://localhost:5000/api/Account/" + accId;
             var data = new StringContent(accJson, System.Text.Encoding.UTF8, "application/json");
             try
             {
-                if (AccountEmailExists(Auth.AccountId, Auth.Email))
+                if (isAccountWithEmailExists)
                 {
                     ViewData["fail"] = "Dublicate Email";
                     return Page();
@@ -107,7 +118,8 @@ namespace WebRazor.Pages.Account
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!AccountExists(Auth.AccountId))
+                var isAccountExists = await this.AccountExists(Auth.AccountId);
+                if (!isAccountExists)
                 {
                     return NotFound();
                 }

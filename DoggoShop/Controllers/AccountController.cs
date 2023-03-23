@@ -43,6 +43,24 @@ namespace DoggoShop.Controllers
             }
             return Ok(account);
         }
+        [HttpGet("isAccountExists/{id}")]
+        public IActionResult IsAccountExist(int id)
+        {
+            var result = context.Accounts.Any(e => e.AccountId == id);
+            return Ok(result);
+        }
+        [HttpGet("isAccountWithEmailExists/{id}/{email}")]
+        public IActionResult IsAccountWithEmailExist(int id, string email)
+        {
+            var result = context.Accounts.Any(e => e.Email == email && e.AccountId != id);
+            return Ok(result);
+        }
+        [HttpGet("isEmailExist/{email}")]
+        public IActionResult IsEmailExist(string email)
+        {
+            var result = context.Accounts.Any(e => e.Email.Equals(email));
+            return Ok(result);
+        }
         [HttpPost]
         public async Task<IActionResult> PostAccount(AccountDTO accDTO)
         {

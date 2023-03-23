@@ -9,12 +9,10 @@ namespace WebRazor.Pages.Account
 {
     public class ForgotModel : PageModel
     {
-        private readonly PRN221DBContext dbContext;
         private HttpClient client;
         private string AccountApiUrl = "";
-        public ForgotModel(PRN221DBContext dBContext)
+        public ForgotModel()
         {
-            this.dbContext = dBContext;
             this.client = new HttpClient();
         }
 
@@ -51,7 +49,6 @@ namespace WebRazor.Pages.Account
             ViewData["success"] = "New password was send to your email";
 
             account.Password = HashPassword.Hash(password);
-            await dbContext.SaveChangesAsync();
             return Page();
         }
     }

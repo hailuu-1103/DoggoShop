@@ -14,13 +14,11 @@ namespace WebRazor.Pages.Account
 {
     public class LoginModel : PageModel
     {
-        private readonly PRN221DBContext dbContext;
         private readonly HttpClient client;
         private string AccountApiUrl = "";
 
-        public LoginModel(PRN221DBContext dbContext)
+        public LoginModel()
         {
-            this.dbContext = dbContext;
             client = new HttpClient();
             var contentType = new MediaTypeWithQualityHeaderValue("application/json");
             client.DefaultRequestHeaders.Accept.Add(contentType);

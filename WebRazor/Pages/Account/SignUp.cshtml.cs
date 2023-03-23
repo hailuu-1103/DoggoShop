@@ -13,14 +13,12 @@ namespace WebRazor.Pages.Account
 {
     public class SignUpModel : PageModel
     {
-        private readonly PRN221DBContext dbContext;
         private HttpClient client;
 
         private string AccountApiUrl = "";
 
-        public SignUpModel(PRN221DBContext dbContext)
+        public SignUpModel()
         {
-            this.dbContext = dbContext;
             this.client = new HttpClient();
             this.AccountApiUrl = "https://localhost:5000/api/account";
         }
@@ -38,7 +36,18 @@ namespace WebRazor.Pages.Account
         {
 
         }
-
+        private async Task<bool> IsEmailExists(string? email)
+        {
+            var url = "https://localhost:5000/api/account/isEmailExist/" + email;
+            var response = await client.GetAsync(url);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var result = System.Text.Json.JsonSerializer.Deserialize<bool>(data, options);
+            return result;
+        }
         public async Task<IActionResult> OnPost()
         {
             if (!ModelState.IsValid)
@@ -52,7 +61,7 @@ namespace WebRazor.Pages.Account
                 return Page();
             }
 
-            var acc = await dbContext.Accounts.SingleOrDefaultAsync(a => a.Email.Equals(Account.Email));
+            var acc = await this.IsEmailExists(Account.Email);
 
             if (acc != null)
             {

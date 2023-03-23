@@ -11,16 +11,14 @@ namespace WebRazor.Pages.Account
     [Authorize(Roles = "Customer")]
     public class ProfileModel : PageModel
     {
-        private readonly PRN221DBContext dbContext;
         private HttpClient client;
         private string AccountApiUrl = "";
 
         [BindProperty]
         public Models.Account Auth { get; set; }
 
-        public ProfileModel(PRN221DBContext dbContext)
+        public ProfileModel()
         {
-            this.dbContext = dbContext;
             this.client = new HttpClient();
         }
 
