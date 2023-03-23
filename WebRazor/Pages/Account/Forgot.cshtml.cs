@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
 using WebRazor.Materials;
 using WebRazor.Models;
 
@@ -9,10 +10,12 @@ namespace WebRazor.Pages.Account
     public class ForgotModel : PageModel
     {
         private readonly PRN221DBContext dbContext;
-
+        private HttpClient client;
+        private string AccountApiUrl = "";
         public ForgotModel(PRN221DBContext dBContext)
         {
             this.dbContext = dBContext;
+            this.client = new HttpClient();
         }
 
         public async Task OnGet()
@@ -20,16 +23,20 @@ namespace WebRazor.Pages.Account
         }
 
          public async Task<IActionResult> OnPost(string? email)
-        {
+         {
             if (email == null || email.Equals(""))
             {
                 ViewData["error"] = "Email is required";
                 return Page();
             }
-
-            var a = await dbContext.Accounts.ToListAsync();
-
-            Models.Account account = await dbContext.Accounts.FirstOrDefaultAsync(a => a.Email != null && a.Email.Equals(email));
+            AccountApiUrl = "https://localhost:5000/api/Account/email/" + email;
+            var response = await client.GetAsync(AccountApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            Models.Account account = JsonSerializer.Deserialize<Models.Account>(data, options);
 
             if (account == null)
             {

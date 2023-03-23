@@ -54,7 +54,7 @@ namespace WebRazor.Pages.Account
 
             var acc = await dbContext.Accounts.SingleOrDefaultAsync(a => a.Email.Equals(Account.Email));
 
-            if ( acc != null)
+            if (acc != null)
             {
                 ViewData["msg"] = "This email is exist";
                 return Page();

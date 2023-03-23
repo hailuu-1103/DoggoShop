@@ -1,4 +1,5 @@
 using DocumentFormat.OpenXml.Spreadsheet;
+using DoggoShopAPI.DTO;
 using ExcelDataReader.Log;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -6,7 +7,9 @@ using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Diagnostics;
+using System.Net.Http;
 using System.Security.Claims;
+using System.Text.Json;
 using WebRazor.Models;
 
 namespace WebRazor.Pages.Account
@@ -15,20 +18,28 @@ namespace WebRazor.Pages.Account
     public class EditModel : PageModel
     {
         private readonly PRN221DBContext dbContext;
-
+        private HttpClient client;
+        private string AccountApiUrl = "";
         [BindProperty]
         public Models.Account? Auth { get; set; }
 
         public EditModel(PRN221DBContext dbContext)
         {
             this.dbContext = dbContext;
-
+            this.client = new HttpClient();
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
-            Auth = await dbContext.Accounts.Include(a => a.Customer)
-                .FirstOrDefaultAsync(a => a.AccountId == Int32.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value));
+            var accId = Int32.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            AccountApiUrl = "https://localhost:5000/api/Account/id/" + accId;
+            var response = await client.GetAsync(AccountApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            Auth = JsonSerializer.Deserialize<Models.Account>(data, options);
 
             if (Auth == null)
             {
@@ -51,7 +62,7 @@ namespace WebRazor.Pages.Account
         public async Task<IActionResult> OnPostAsync()
         {
             bool valid = true;
-
+            var accId = Int32.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
             foreach (var modelStateKey in ViewData.ModelState.Keys)
             {
                 if (!modelStateKey.Equals("Auth.Password"))
@@ -65,25 +76,34 @@ namespace WebRazor.Pages.Account
             {
                 return Page();
             }
-            
-            dbContext.Attach(Auth).State = EntityState.Modified;
-            dbContext.Entry(Auth).Property(x => x.Password).IsModified = false;
-            dbContext.Entry(Auth).Property(x => x.Role).IsModified = false;
-            dbContext.Entry(Auth).Property(x => x.Email).IsModified = true;
-            dbContext.Entry(Auth.Customer).Property(x => x.CompanyName).IsModified = true;
-            dbContext.Entry(Auth.Customer).Property(x => x.ContactTitle).IsModified = true;
-            dbContext.Entry(Auth.Customer).Property(x => x.ContactName).IsModified = true;
-            dbContext.Entry(Auth.Customer).Property(x => x.Address).IsModified = true;
-
+            var accDTO = new AccountDTO()
+            {
+                Email = Auth.Email,
+                Password = Auth.Password,
+                CompanyName = Auth.Customer.CompanyName,
+                ContactName = Auth.Customer.ContactName,
+                ContactTitle = Auth.Customer.ContactTitle,
+                Address = Auth.Customer.Address,
+            };
+            var accJson = JsonSerializer.Serialize(accDTO);
+            AccountApiUrl = "https://localhost:5000/api/Account/" + accId;
+            var data = new StringContent(accJson, System.Text.Encoding.UTF8, "application/json");
             try
             {
                 if (AccountEmailExists(Auth.AccountId, Auth.Email))
                 {
-                    ViewData["fail"] = "Dublicat Email";
+                    ViewData["fail"] = "Dublicate Email";
                     return Page();
                 }
-                await dbContext.SaveChangesAsync();
-                ViewData["success"] = "Update Successfull";
+                var response = await client.PutAsync(AccountApiUrl, data);
+                if (response.IsSuccessStatusCode)
+                {
+                    ViewData["success"] = "Update Successfull";
+                }
+                else
+                {
+                    ViewData["fail"] = "Failed to update account, reason " + response.ReasonPhrase;
+                }
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -91,6 +111,11 @@ namespace WebRazor.Pages.Account
                 {
                     return NotFound();
                 }
+            }
+            catch(DbUpdateException ex)
+            {
+                ViewData["fail"] = "Message: " + ex.Message;
+                return NotFound();
             }
             return Page();
 

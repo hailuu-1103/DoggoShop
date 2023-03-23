@@ -22,10 +22,21 @@ namespace DoggoShop.Controllers
             }
             return Ok(items);
         }
-        [HttpGet("id")]
-        public IActionResult GetAccount(int id)
+        [HttpGet("id/{id}")]
+        public IActionResult GetAccountById(int id)
         {
             var account = context.Accounts.Include(acc => acc.Customer).Include(acc => acc.Employee).FirstOrDefault(acc => acc.AccountId == id);
+            if (account == null)
+            {
+                return BadRequest("Not found account");
+            }
+            return Ok(account);
+        }
+
+        [HttpGet("email/{email}")]
+        public IActionResult GetAccountByEmail(string email)
+        {
+            var account = context.Accounts.Include(acc => acc.Customer).Include(acc => acc.Employee).FirstOrDefault(acc => acc.Email.Equals(email));
             if (account == null)
             {
                 return BadRequest("Not found account");
@@ -59,6 +70,48 @@ namespace DoggoShop.Controllers
             await context.Customers.AddAsync(cus);
             await context.Accounts.AddAsync(acc);
             await context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateAccount(int id, AccountDTO accDTO)
+        {
+            var accountExist = context.Accounts.Any(e => e.AccountId == id);
+            if (accDTO == null)
+            {
+                return BadRequest();
+            }
+            var accountEmailExists = context.Accounts.Any(e => e.Email == accDTO.Email && e.AccountId != id);
+            var account = context.Accounts.FirstOrDefault(acc => acc.AccountId == id);
+            account.Email = accDTO.Email;
+            account.Password = accDTO.Password;
+
+            var customer = context.Accounts.Include(acc => acc.Customer).FirstOrDefault(acc => acc.AccountId == id).Customer;
+            customer.CompanyName = accDTO.CompanyName;
+            customer.ContactTitle = accDTO.ContactTitle;
+            customer.ContactName = accDTO.ContactName;
+            customer.Address = accDTO.Address;
+            try
+            {
+                context.Entry<Account>(account).State = EntityState.Modified;
+                context.Entry<Customer>(customer).State = EntityState.Modified;
+                if (accountEmailExists)
+                {
+                    return BadRequest();
+                }
+                var countChange = await context.SaveChangesAsync();
+                if(countChange == 0)
+                {
+                    return BadRequest();
+                } 
+            }
+            catch (DbUpdateConcurrencyException) 
+            {
+                if (!accountExist)
+                {
+                    return NotFound();
+                }
+            }
             return Ok();
         }
     }

@@ -12,6 +12,8 @@ namespace WebRazor.Pages.Account
     public class ProfileModel : PageModel
     {
         private readonly PRN221DBContext dbContext;
+        private HttpClient client;
+        private string AccountApiUrl = "";
 
         [BindProperty]
         public Models.Account Auth { get; set; }
@@ -19,14 +21,21 @@ namespace WebRazor.Pages.Account
         public ProfileModel(PRN221DBContext dbContext)
         {
             this.dbContext = dbContext;
-
+            this.client = new HttpClient();
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
-            Auth = await dbContext.Accounts.Include(a => a.Customer)
-                .FirstOrDefaultAsync(a => a.AccountId == Int32.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value));
-
+            var accId = Int32.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            AccountApiUrl = "https://localhost:5000/api/Account/id/" + accId;
+            var response = await client.GetAsync(AccountApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            Auth = JsonSerializer.Deserialize<Models.Account>(data, options);
+          
             if (Auth == null)
             {
                 return NotFound();
