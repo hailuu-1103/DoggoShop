@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Json;
 using WebRazor.Materials;
 using WebRazor.Models;
 
@@ -10,8 +11,9 @@ namespace WebRazor.Pages.Product
 {
     public class ListModel : PageModel
     {
-        private readonly PRN221DBContext dbContext;
-
+        private HttpClient client;
+        private string ProductApiUrl;
+        private string CategoryApiUrl;
         [BindProperty] public List<Models.Product> Products { get; set; } = new List<Models.Product>();
 
         [BindProperty] public List<Category> Categories { get; set; }
@@ -26,9 +28,9 @@ namespace WebRazor.Pages.Product
 
         public List<String> PagesLink { get; set; } = new List<string>();
 
-        public ListModel(PRN221DBContext dbContext)
+        public ListModel()
         {
-            this.dbContext = dbContext;
+            this.client = new HttpClient();
         }
 
         public async Task<IActionResult> OnGet(int? id)
@@ -40,14 +42,21 @@ namespace WebRazor.Pages.Product
                 return NotFound();
             }
 
-            Categories = dbContext.Categories.ToList();
+            CategoryApiUrl = "https://localhost:5000/api/category";
+            var responseCategory = await client.GetAsync(CategoryApiUrl);
+            var dataCat = await responseCategory.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            Categories = JsonSerializer.Deserialize<List<Category>>(dataCat, options).ToList();
 
             Id = (int)id;
 
-            int size = await dbContext.Products
-                .Where(p => p.DeletedAt == null)
-                .Where(p => p.CategoryId == id)
-                .CountAsync();
+            ProductApiUrl = "https://localhost:5000/api/Product/getNumberOfProductsByCategory/" + id;
+            var responseNewProducts = await client.GetAsync(ProductApiUrl);
+            var dataNewProducts = await responseNewProducts.Content.ReadAsStringAsync();
+            var size = JsonSerializer.Deserialize<int>(dataNewProducts, options);
 
             int total = CalcPagesCount(size);
 
@@ -66,17 +75,18 @@ namespace WebRazor.Pages.Product
             PageLink page = new PageLink(perPage);
             PagesLink = page.getLink(Page, size, "/Product/List/" + id + "?" + orderUrl + "&");
 
-            var list = dbContext.Products
-                .Where(p => p.DeletedAt == null)
-                .Where(p => p.CategoryId == id);
+            ProductApiUrl = "https://localhost:5000/api/Product/getActiveProductByCategory/" + id;
+            var response = await client.GetAsync(ProductApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var list = JsonSerializer.Deserialize<List<Models.Product>>(data, options);
 
             switch (Order)
             {
                 case "Asc":
-                    list = list.OrderBy(p => p.UnitPrice);
+                    list = (List<Models.Product>?)list.OrderBy(p => p.UnitPrice);
                     break;
                 case "Desc":
-                    list = list.OrderByDescending(p => p.UnitPrice);
+                    list = (List<Models.Product>?)list.OrderByDescending(p => p.UnitPrice);
                     break;
             }
 

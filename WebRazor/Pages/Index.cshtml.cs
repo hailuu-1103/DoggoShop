@@ -1,3 +1,4 @@
+using DoggoShopClient.DTO;
 using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -12,11 +13,13 @@ namespace WebRazor.Pages
 {
     public class IndexModel : PageModel
     {
-        private readonly PRN221DBContext dbContext;
-
-        public IndexModel(PRN221DBContext dbContext)
+        private HttpClient client;
+        private string CategoryApiUrl;
+        private string ProductApiUrl;
+        private string OrderDetailApiUrl;
+        public IndexModel()
         {
-            this.dbContext = dbContext;
+            client = new HttpClient();
         }
 
         public List<Category> Categories { get; set; }
@@ -32,27 +35,37 @@ namespace WebRazor.Pages
             {
                 return NotFound();
             }
+            CategoryApiUrl = "https://localhost:5000/api/category";
+            var responseCategory = await client.GetAsync(CategoryApiUrl);
+            var dataCat = await responseCategory.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            Categories = JsonSerializer.Deserialize<List<Category>>(dataCat, options).ToList();
+            ProductApiUrl = "https://localhost:5000/api/product";
+            var responseProduct = await client.GetAsync(ProductApiUrl);
+            var data = await responseProduct.Content.ReadAsStringAsync();
+            var products = JsonSerializer.Deserialize<List<Models.Product>>(data, options).ToList();
 
-            Categories = dbContext.Categories.ToList();
-
-            var products = dbContext.Products.Where(p => p.DeletedAt == null).ToList();
-
-            var idsBestSale = dbContext.OrderDetails
-                .Include(d => d.Product)
-                .Where(d => d.Product.DeletedAt == null)
-                .GroupBy(d => d.ProductId)
-                .Select(g => new { ProductId = g.Key, Sum = g.Sum(d => d.Quantity) })
-                .OrderByDescending(o => o.Sum);
-
+            // BEST SALE
+            OrderDetailApiUrl = "https://localhost:5000/api/orderdetail/getBestSaleProductId";
+            var responseOd = await client.GetAsync(ProductApiUrl);
+            var dataOd = await responseOd.Content.ReadAsStringAsync();
+            var idsBestSale = JsonSerializer.Deserialize<List<BestSaleDTO>>(data, options).ToList();
             BestSaleProducts = new List<Models.Product>();
             foreach (var id in idsBestSale.Take(4))
             {
                 BestSaleProducts.Add(products.First(p => p.ProductId == id.ProductId));
             }
 
-            NewProducts = dbContext.Products.Where(p => p.DeletedAt == null)
-                .OrderByDescending(p => p.ProductId).Take(4).ToList();
+            // NEW Products
+            ProductApiUrl = "https://localhost:5000/api/product/getNewActiveProducts/" + 4;
+            var responseNewProducts = await client.GetAsync(ProductApiUrl);
+            var dataNewProducts = await responseNewProducts.Content.ReadAsStringAsync();
+            NewProducts = JsonSerializer.Deserialize<List<Models.Product>>(dataNewProducts, options).ToList();
 
+            // HOT Products
             HotProducts = new List<Models.Product>();
             foreach (var id in idsBestSale.OrderByDescending(o => o.ProductId).Take(4))
             {

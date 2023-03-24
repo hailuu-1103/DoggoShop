@@ -16,11 +16,19 @@ using iText.Layout.Borders;
 using iText.Layout;
 using iText.Kernel.Geom;
 using System.Security.Claims;
+using System.Text;
+using DocumentFormat.OpenXml.Drawing;
 
 namespace WebRazor.Pages.Cart
 {
     public class IndexModel : PageModel
     {
+        private HttpClient client;
+        private string AccountApiUrl;
+        private string ProductApiUrl;
+        private string CustomerApiUrl;
+        private string OrdersApiUrl;
+        private string OrderDetailApiUrl;
         public Dictionary<Models.Product, int> Cart { get; set; } = new Dictionary<Models.Product, int>();
 
         [BindProperty]
@@ -28,15 +36,14 @@ namespace WebRazor.Pages.Cart
 
         public decimal Sum { get; set; } = 0;
 
-        private readonly PRN221DBContext dbContext;
 
         public bool Disable = false;
 
         private Models.Order Order;
 
-        public IndexModel(PRN221DBContext dbContext)
+        public IndexModel()
         {
-            this.dbContext = dbContext;
+            this.client = new HttpClient();
         }
 
         #region Load Info
@@ -44,10 +51,20 @@ namespace WebRazor.Pages.Cart
         {
             try
             {
-                Models.Account? auth = await dbContext.Accounts
-                    .FirstOrDefaultAsync(a => a.AccountId == Int32.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value));
+                var accId = Int32.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                AccountApiUrl = "https://localhost:5000/api/Account/id/" + accId;
+                var response = await client.GetAsync(AccountApiUrl);
+                var data = await response.Content.ReadAsStringAsync();
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                };
+                var auth = JsonSerializer.Deserialize<Models.Account>(data, options);
 
-                Customer = await dbContext.Customers.FirstOrDefaultAsync(c => c.CustomerId == auth.CustomerId);
+                CustomerApiUrl = "https://localhost:5000/api/customer/getCustomerById/" + auth.CustomerId;
+                var responseCus = await client.GetAsync(CustomerApiUrl);
+                var dataCus = await responseCus.Content.ReadAsStringAsync();
+                Customer = JsonSerializer.Deserialize<Models.Customer>(dataCus, options);
                 Customer.Accounts.Add(auth);
 
                 Disable = true;
@@ -127,7 +144,17 @@ namespace WebRazor.Pages.Cart
         {
             Customer customer = new Customer();
             customer.CustomerId = RandomString(5);
-            while (await dbContext.Customers.FirstOrDefaultAsync(c => c.CustomerId == customer.CustomerId) != null)
+
+            CustomerApiUrl = "https://localhost:5000/api/Customer/getCustomerById/" + customer.CustomerId;
+            var responseCus = await client.GetAsync(CustomerApiUrl);
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var dataCus = await responseCus.Content.ReadAsStringAsync();
+            var isCustomerIdExist = JsonSerializer.Deserialize<bool>(dataCus, options);
+            // Check unique customerId
+            while (!isCustomerIdExist)
             {
                 customer.CustomerId = RandomString(5);
             }
@@ -137,14 +164,23 @@ namespace WebRazor.Pages.Cart
             customer.CompanyName = Customer.CompanyName;
             customer.ContactTitle = Customer.ContactTitle;
             customer.CreatedAt = DateTime.Now;
-            await dbContext.Customers.AddAsync(customer);
-            await dbContext.SaveChangesAsync();
-
-            return await dbContext.Customers.OrderBy(o => o.CustomerId).LastOrDefaultAsync();
+            CustomerApiUrl = "https://localhost:5000/api/customer";
+            var cusJson = JsonSerializer.Serialize(customer, options);
+            var content = new StringContent(cusJson, Encoding.UTF8, "application/json");
+            await client.PostAsync(AccountApiUrl, content);
+            CustomerApiUrl = "https://localhost:5000/api/customer/getLastCustomer";
+            var responseLastCus = await client.GetAsync(CustomerApiUrl);
+            var dataLastCus = await responseLastCus.Content.ReadAsStringAsync();
+            var lastCus = JsonSerializer.Deserialize<Customer>(dataLastCus, options);
+            return lastCus;
         }
 
         public async Task<Models.Order> AddOrder()
         {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
             if (Customer.CustomerId == null)
             {
                 Customer = await AddCustomer();
@@ -155,14 +191,23 @@ namespace WebRazor.Pages.Cart
             order.OrderDate = DateTime.Now;
             order.RequiredDate = DateTime.Now.AddDays(7);
 
-            await dbContext.Orders.AddAsync(order);
-            await dbContext.SaveChangesAsync();
-
-            return await dbContext.Orders.OrderBy(o => o.OrderDate).LastOrDefaultAsync();
+            OrdersApiUrl = "https://localhost:5000/api/Order";
+            var orderJson = JsonSerializer.Serialize(order);
+            var content = new StringContent(orderJson, Encoding.UTF8, "application/json");
+            await client.PostAsync(OrdersApiUrl, content);
+            OrdersApiUrl = "https://localhost:5000/api/Order/getLastOrder";
+            var response = await client.GetAsync(OrdersApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var lastOrder = JsonSerializer.Deserialize<Models.Order>(data, options);
+            return lastOrder;
         }
 
         public async Task<decimal> AddOrderDetail(int key, int value, Models.Order order)
         {
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
             Models.Product product = await getProductAsync(key);
 
             if (product.UnitsInStock - (short)value < 0)
@@ -172,7 +217,11 @@ namespace WebRazor.Pages.Cart
             product.UnitsInStock -= (short)value;
             product.UnitsOnOrder += (short)value;
 
-            if (await dbContext.OrderDetails.Include(o => o.Order).Where(o => o.ProductId == product.ProductId && o.Order.CustomerId == Customer.CustomerId).CountAsync() > 0)
+            OrderDetailApiUrl = "https://localhost:5000/api/OrderDetail/getOrderCount/" + Customer.CustomerId + "/" + product.ProductId;
+            var response = await client.GetAsync(OrderDetailApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var orderCount = JsonSerializer.Deserialize<int>(data, options);
+            if (orderCount > 0)
             {
                 product.ReorderLevel += 1;
             }
@@ -183,9 +232,14 @@ namespace WebRazor.Pages.Cart
             od.Quantity = (short)value;
             od.UnitPrice = (decimal)product.UnitPrice;
             od.Discount = 0;
-            await dbContext.OrderDetails.AddAsync(od);
-            await dbContext.SaveChangesAsync();
-
+            OrderDetailApiUrl = "https://localhost:5000/api/OrderDetail";
+            var odJson = JsonSerializer.Serialize(od);
+            var content = new StringContent(odJson, Encoding.UTF8, "application/json");
+            var responseOd = await client.PostAsync(OrderDetailApiUrl, content);
+            if (!responseOd.IsSuccessStatusCode)
+            {
+                ViewData["fail"] = responseOd.ReasonPhrase;
+            }
             return od.UnitPrice * od.Quantity;
         }
         #endregion
@@ -229,7 +283,6 @@ namespace WebRazor.Pages.Cart
 
                     order.Freight = Freight;
 
-                    await dbContext.SaveChangesAsync();
 
                     ViewData["success"] = "Order successfull";
 
@@ -263,7 +316,14 @@ namespace WebRazor.Pages.Cart
                 return null;
             }
 
-            Models.Product product = (await dbContext.Products.Where(p => p.DeletedAt == null).FirstOrDefaultAsync(p => p.ProductId == id));
+            ProductApiUrl = "https://localhost:5000/api/Product/getActiveProductById/" + id;
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            var response = await client.GetAsync(ProductApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            Models.Product product = JsonSerializer.Deserialize<Models.Product>(data, options);
 
             return product;
         }
@@ -441,7 +501,7 @@ namespace WebRazor.Pages.Cart
         public async Task SendMail()
         {
 
-            MemoryStream ms = new MemoryStream();
+            /*MemoryStream ms = new MemoryStream();
 
             PdfWriter writer = new PdfWriter(ms);
             PdfDocument pdfDoc = new PdfDocument(writer);
@@ -504,7 +564,7 @@ namespace WebRazor.Pages.Cart
             ms.Position = 0;
 
             Mail mail = new Mail();
-            mail.SendEmailOrderAsync(Customer.Accounts.ToList()[0].Email, byteInfo);
+            mail.SendEmailOrderAsync(Customer.Accounts.ToList()[0].Email, byteInfo);*/
 
         }
 
@@ -513,7 +573,7 @@ namespace WebRazor.Pages.Cart
             // Table
             Table table = new Table(4, false).SetWidth(UnitValue.CreatePercentValue(100)); ;
 
-            // Headings
+           /* // Headings
             Cell cellProductId = new Cell(1, 1)
                .SetBackgroundColor(ColorConstants.LIGHT_GRAY)
                .SetTextAlignment(TextAlignment.CENTER)
@@ -573,7 +633,7 @@ namespace WebRazor.Pages.Cart
                 table.AddCell(cName);
                 table.AddCell(cQty);
                 table.AddCell(cPrice);
-            }
+            }*/
 
             return table;
         }

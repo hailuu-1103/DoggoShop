@@ -2,17 +2,18 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using System.Text.Json;
 using WebRazor.Models;
 
 namespace WebRazor.Pages.Product
 {
     public class DetailModel : PageModel
     {
-        private readonly PRN221DBContext dbContext;
-
-        public DetailModel(PRN221DBContext dbContext)
+        private HttpClient client;
+        private string ProductApiUrl = "";
+        public DetailModel()
         {
-            this.dbContext = dbContext;
+            this.client = new HttpClient();
         }
 
         [BindProperty]
@@ -31,9 +32,14 @@ namespace WebRazor.Pages.Product
             {
                 return NotFound();
             }
-
-            Product = await dbContext.Products.Where(p => p.DeletedAt == null).FirstOrDefaultAsync(m => m.ProductId == id);
-            var cat = await dbContext.Categories.ToListAsync();
+            ProductApiUrl = "https://localhost:5000/api/Product/getActiveProductById/" + id;
+            var response = await client.GetAsync(ProductApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            Product =  JsonSerializer.Deserialize<Models.Product>(data, options);
 
             if (Product == null)
             {
@@ -56,8 +62,14 @@ namespace WebRazor.Pages.Product
                 return NotFound();
             }
 
-            Product = await dbContext.Products.Where(p => p.DeletedAt == null).FirstOrDefaultAsync(m => m.ProductId == id);
-            var cat = await dbContext.Categories.ToListAsync();
+            ProductApiUrl = "https://localhost:5000/api/Product/getActiveProductById/" + id;
+            var response = await client.GetAsync(ProductApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            Product = JsonSerializer.Deserialize<Models.Product>(data, options);
 
             if (Product == null)
             {

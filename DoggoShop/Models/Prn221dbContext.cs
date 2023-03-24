@@ -162,7 +162,7 @@ public partial class Prn221dbContext : DbContext
 
         modelBuilder.Entity<OrderDetail>(entity =>
         {
-            entity.HasKey(e => new { e.OrderId, e.ProductId }).HasName("PK_Order_Details");
+            entity.HasKey(e => new { e.OrderId, e.ProductId });
 
             entity.ToTable("Order Details");
 
