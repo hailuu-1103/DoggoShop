@@ -66,7 +66,7 @@
                     @foreach(var item in order.OrderDetails){
                         <div class="profile-order-content">
                             <div class="profile-order-content-col1">
-                                <a href="~/Product/Detail/@item.ProductId"><img src="~/img/1.jpg" width="100%" /></a>
+                                <a href="~/Product/Detail/@item.ProductId"><img src="@item.Product.Image" width="100%" /></a>
                             </div>
                             <div class="profile-order-content-col2">@item.Product.ProductName</div>
                             <div class="profile-order-content-col3">Quantity: @item.Quantity</div>

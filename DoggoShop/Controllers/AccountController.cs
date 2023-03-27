@@ -25,7 +25,7 @@ namespace DoggoShop.Controllers
         [HttpGet("id/{id}")]
         public IActionResult GetAccountById(int id)
         {
-            var account = context.Accounts.Include(acc => acc.Customer).Include(acc => acc.Employee).FirstOrDefault(acc => acc.AccountId == id);
+            var account = context.Accounts.Include(acc => acc.Customer).Include(acc => acc.Employee).Include(account => account.Customer).ThenInclude(acc => acc.Orders).ThenInclude(o => o.OrderDetails).ThenInclude(od=>od.Product).FirstOrDefault(acc => acc.AccountId == id);
             if (account == null)
             {
                 return BadRequest("Not found account");

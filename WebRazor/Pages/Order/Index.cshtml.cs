@@ -20,6 +20,7 @@ namespace WebRazor.Pages.Order
         public IndexModel(PRN221DBContext dbContext)
         {
             this.dbContext = dbContext;
+            client = new HttpClient();
         }
 
         [BindProperty]

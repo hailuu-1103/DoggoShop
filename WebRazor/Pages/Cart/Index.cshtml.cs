@@ -1,22 +1,12 @@
-using iText.IO.Image;
-using iText.Kernel.Colors;
-using iText.Kernel.Pdf.Canvas.Draw;
-using iText.Kernel.Pdf;
-using iText.Layout.Element;
 using iText.Layout.Properties;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Transactions;
-using WebRazor.Materials;
 using Table = iText.Layout.Element.Table;
-using iText.Layout.Borders;
 using iText.Layout;
-using iText.Kernel.Geom;
 using System.Security.Claims;
 using System.Text;
-using DocumentFormat.OpenXml.Drawing;
 using DoggoShopClient.Models;
 
 namespace WebRazor.Pages.Cart
@@ -32,7 +22,7 @@ namespace WebRazor.Pages.Cart
         public Dictionary<DoggoShopClient.Models.Product, int> Cart { get; set; } = new Dictionary<DoggoShopClient.Models.Product, int>();
 
         [BindProperty]
-        public DoggoShopClient.Models.Customer? Customer { get; set; }
+        public Customer? Customer { get; set; }
 
         public decimal Sum { get; set; } = 0;
 
@@ -283,10 +273,10 @@ namespace WebRazor.Pages.Cart
 
                     order.Freight = Freight;
 
-
                     ViewData["success"] = "Order successfull";
-
+                    listIdCart.Clear();
                     HttpContext.Session.Remove("cart");
+                    HttpContext.Session.SetInt32("cartSize", listIdCart.Count);
                     transaction.Complete();
                     Order = order;
 
