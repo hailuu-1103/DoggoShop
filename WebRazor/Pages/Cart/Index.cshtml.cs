@@ -10,7 +10,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using System.Transactions;
 using WebRazor.Materials;
-using WebRazor.Models;
 using Table = iText.Layout.Element.Table;
 using iText.Layout.Borders;
 using iText.Layout;
@@ -18,6 +17,7 @@ using iText.Kernel.Geom;
 using System.Security.Claims;
 using System.Text;
 using DocumentFormat.OpenXml.Drawing;
+using DoggoShopClient.Models;
 
 namespace WebRazor.Pages.Cart
 {
@@ -29,17 +29,17 @@ namespace WebRazor.Pages.Cart
         private string CustomerApiUrl;
         private string OrdersApiUrl;
         private string OrderDetailApiUrl;
-        public Dictionary<Models.Product, int> Cart { get; set; } = new Dictionary<Models.Product, int>();
+        public Dictionary<DoggoShopClient.Models.Product, int> Cart { get; set; } = new Dictionary<DoggoShopClient.Models.Product, int>();
 
         [BindProperty]
-        public Models.Customer? Customer { get; set; }
+        public DoggoShopClient.Models.Customer? Customer { get; set; }
 
         public decimal Sum { get; set; } = 0;
 
 
         public bool Disable = false;
 
-        private Models.Order Order;
+        private DoggoShopClient.Models.Order Order;
 
         public IndexModel()
         {
@@ -59,12 +59,12 @@ namespace WebRazor.Pages.Cart
                 {
                     PropertyNameCaseInsensitive = true
                 };
-                var auth = JsonSerializer.Deserialize<Models.Account>(data, options);
+                var auth = JsonSerializer.Deserialize<DoggoShopClient.Models.Account>(data, options);
 
                 CustomerApiUrl = "https://localhost:5000/api/customer/getCustomerById/" + auth.CustomerId;
                 var responseCus = await client.GetAsync(CustomerApiUrl);
                 var dataCus = await responseCus.Content.ReadAsStringAsync();
-                Customer = JsonSerializer.Deserialize<Models.Customer>(dataCus, options);
+                Customer = JsonSerializer.Deserialize<DoggoShopClient.Models.Customer>(dataCus, options);
                 Customer.Accounts.Add(auth);
 
                 Disable = true;
@@ -99,7 +99,7 @@ namespace WebRazor.Pages.Cart
         {
             foreach (var item in list)
             {
-                Models.Product product = await getProductAsync(item.Key);
+                DoggoShopClient.Models.Product product = await getProductAsync(item.Key);
 
                 Cart.Add(product, item.Value);
 
@@ -175,7 +175,7 @@ namespace WebRazor.Pages.Cart
             return lastCus;
         }
 
-        public async Task<Models.Order> AddOrder()
+        public async Task<DoggoShopClient.Models.Order> AddOrder()
         {
             var options = new JsonSerializerOptions
             {
@@ -186,7 +186,7 @@ namespace WebRazor.Pages.Cart
                 Customer = await AddCustomer();
             }
 
-            Models.Order order = new Models.Order();
+            DoggoShopClient.Models.Order order = new DoggoShopClient.Models.Order();
             order.CustomerId = Customer.CustomerId;
             order.OrderDate = DateTime.Now;
             order.RequiredDate = DateTime.Now.AddDays(7);
@@ -198,17 +198,17 @@ namespace WebRazor.Pages.Cart
             OrdersApiUrl = "https://localhost:5000/api/Order/getLastOrder";
             var response = await client.GetAsync(OrdersApiUrl);
             var data = await response.Content.ReadAsStringAsync();
-            var lastOrder = JsonSerializer.Deserialize<Models.Order>(data, options);
+            var lastOrder = JsonSerializer.Deserialize<DoggoShopClient.Models.Order>(data, options);
             return lastOrder;
         }
 
-        public async Task<decimal> AddOrderDetail(int key, int value, Models.Order order)
+        public async Task<decimal> AddOrderDetail(int key, int value, DoggoShopClient.Models.Order order)
         {
             var options = new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             };
-            Models.Product product = await getProductAsync(key);
+            DoggoShopClient.Models.Product product = await getProductAsync(key);
 
             if (product.UnitsInStock - (short)value < 0)
             {
@@ -274,7 +274,7 @@ namespace WebRazor.Pages.Cart
                 decimal Freight = 0;
                 try
                 {
-                    Models.Order order = await AddOrder();
+                    DoggoShopClient.Models.Order order = await AddOrder();
 
                     foreach (var item in listIdCart)
                     {
@@ -309,7 +309,7 @@ namespace WebRazor.Pages.Cart
             return Page();
         }
 
-        public async Task<Models.Product?> getProductAsync(int? id)
+        public async Task<DoggoShopClient.Models.Product?> getProductAsync(int? id)
         {
             if (id == null)
             {
@@ -323,7 +323,7 @@ namespace WebRazor.Pages.Cart
             };
             var response = await client.GetAsync(ProductApiUrl);
             var data = await response.Content.ReadAsStringAsync();
-            Models.Product product = JsonSerializer.Deserialize<Models.Product>(data, options);
+            var product = JsonSerializer.Deserialize<DoggoShopClient.Models.Product>(data, options);
 
             return product;
         }
@@ -338,7 +338,7 @@ namespace WebRazor.Pages.Cart
                 return NotFound();
             }
 
-            Models.Product product = await getProductAsync(id);
+            DoggoShopClient.Models.Product product = await getProductAsync(id);
 
             if (product == null)
             {
@@ -384,7 +384,7 @@ namespace WebRazor.Pages.Cart
                 return NotFound();
             }
 
-            Models.Product product = await getProductAsync(id);
+            DoggoShopClient.Models.Product product = await getProductAsync(id);
 
             if (product == null)
             {
@@ -426,7 +426,7 @@ namespace WebRazor.Pages.Cart
                 return NotFound();
             }
 
-            Models.Product product = await getProductAsync(id);
+            DoggoShopClient.Models.Product product = await getProductAsync(id);
 
             if (product == null)
             {
@@ -464,7 +464,7 @@ namespace WebRazor.Pages.Cart
                 return NotFound();
             }
 
-            Models.Product product = await getProductAsync(id);
+            DoggoShopClient.Models.Product product = await getProductAsync(id);
 
             if (product == null)
             {

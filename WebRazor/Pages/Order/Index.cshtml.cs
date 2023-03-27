@@ -1,3 +1,5 @@
+using DocumentFormat.OpenXml.Bibliography;
+using DoggoShopClient.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -5,12 +7,14 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
 using WebRazor.Materials;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Order
 {
     public class IndexModel : PageModel
     {
+        private HttpClient client;
+        private string AccountApiUrl;
+        private string OrderApiUrl;
         private readonly PRN221DBContext dbContext;
 
         public IndexModel(PRN221DBContext dbContext)
@@ -19,8 +23,8 @@ namespace WebRazor.Pages.Order
         }
 
         [BindProperty]
-        public Models.Account Auth { get; set; }
-        public List<Models.Order> Orders { get; set; }
+        public DoggoShopClient.Models.Account Auth { get; set; }
+        public List<DoggoShopClient.Models.Order> Orders { get; set; }
 
         private int perPage = 5;
 
@@ -30,13 +34,15 @@ namespace WebRazor.Pages.Order
 
         public async Task getData()
         {
-            Auth = await dbContext.Accounts.Include(a => a.Customer)
-                .FirstOrDefaultAsync(a => a.AccountId == Int32.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value));
-
-            var cus = await dbContext.Customers.ToListAsync();
-            var ord = await dbContext.Orders.ToListAsync();
-            var ordDe = await dbContext.OrderDetails.ToListAsync();
-            var pro = await dbContext.Products.ToListAsync();
+            var accId = Int32.Parse(HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+            AccountApiUrl = "https://localhost:5000/api/Account/id/" + accId;
+            var response = await client.GetAsync(AccountApiUrl);
+            var data = await response.Content.ReadAsStringAsync();
+            var options = new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            };
+            Auth = JsonSerializer.Deserialize<DoggoShopClient.Models.Account>(data, options);
         }
 
         [Authorize(Roles = "Customer")]
@@ -94,7 +100,7 @@ namespace WebRazor.Pages.Order
                 return NotFound();
             }
 
-            Models.Product product = (await dbContext.Products.Where(p => p.DeletedAt == null).FirstOrDefaultAsync(p => p.ProductId == id));
+            DoggoShopClient.Models.Product product = (await dbContext.Products.Where(p => p.DeletedAt == null).FirstOrDefaultAsync(p => p.ProductId == id));
 
             if (product == null || product.UnitsInStock == 0)
             {

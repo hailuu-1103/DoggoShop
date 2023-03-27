@@ -8,7 +8,6 @@ using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
 using WebRazor.Materials;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Account
 {
@@ -25,13 +24,13 @@ namespace WebRazor.Pages.Account
         }
 
         [BindProperty]
-        public Models.Account Account { get; set; }
+        public DoggoShopClient.Models.Account Account { get; set; }
 
         public void OnGet()
         {
         }
 
-        private async Task<Models.Account?> getAccount()
+        private async Task<DoggoShopClient.Models.Account?> getAccount()
         {
             AccountApiUrl = "https://localhost:5000/api/account";
             var response = await client.GetAsync(AccountApiUrl);
@@ -40,7 +39,7 @@ namespace WebRazor.Pages.Account
             {
                 PropertyNameCaseInsensitive = true
             };
-            var userList = JsonSerializer.Deserialize<List<Models.Account>>(data, options).ToList();
+            var userList = JsonSerializer.Deserialize<List<DoggoShopClient.Models.Account>>(data, options).ToList();
             var acc = userList.SingleOrDefault(
                     a => a.Email.Equals(Account.Email)
                     && a.Password.Equals(HashPassword.Hash(Account.Password)));
@@ -83,7 +82,7 @@ namespace WebRazor.Pages.Account
             }
         }
 
-        private async Task SetCookie(Models.Account acc)
+        private async Task SetCookie(DoggoShopClient.Models.Account acc)
         {
             // queried data that can be attached 
             // to the User's login identity
@@ -121,7 +120,7 @@ namespace WebRazor.Pages.Account
                 return Page();
             }
 
-            Models.Account acc = await getAccount();
+            DoggoShopClient.Models.Account acc = await getAccount();
 
             if (acc == null)
             {

@@ -25,6 +25,8 @@ public partial class Product
 
     public DateTime? DeletedAt { get; set; }
 
+    public string? Image { get; set; }
+
     public virtual Category? Category { get; set; }
 
     public virtual ICollection<OrderDetail> OrderDetails { get; } = new List<OrderDetail>();

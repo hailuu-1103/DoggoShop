@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Account
 {
@@ -15,7 +14,7 @@ namespace WebRazor.Pages.Account
         private string AccountApiUrl = "";
 
         [BindProperty]
-        public Models.Account Auth { get; set; }
+        public DoggoShopClient.Models.Account Auth { get; set; }
 
         public ProfileModel()
         {
@@ -32,7 +31,7 @@ namespace WebRazor.Pages.Account
             {
                 PropertyNameCaseInsensitive = true
             };
-            Auth = JsonSerializer.Deserialize<Models.Account>(data, options);
+            Auth = JsonSerializer.Deserialize<DoggoShopClient.Models.Account>(data, options);
           
             if (Auth == null)
             {

@@ -1,9 +1,9 @@
+using DoggoShopClient.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System;
 using System.Text.Json.Serialization;
 using WebRazor;
 using WebRazor.Materials;
-using WebRazor.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,7 +16,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     .AddCookie(opt => {
         opt.AccessDeniedPath = "/Account/Login";
         opt.LoginPath = "/Account/Login";
-    }); 
+    });
 
 var app = builder.Build();
 app.UseStaticFiles();

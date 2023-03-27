@@ -1,10 +1,10 @@
+using DoggoShopClient.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using WebRazor.Materials;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Admin.Customer
 {
@@ -20,7 +20,7 @@ namespace WebRazor.Pages.Admin.Customer
 
         [FromQuery(Name = "page")] public int Page { get; set; } = 1;
         private int perPage = 10;
-        public List<Models.Customer> Customers { get; set; }
+        public List<DoggoShopClient.Models.Customer> Customers { get; set; }
         [FromQuery(Name = "txtSearch")] public string Search { get; set; } = "";
 
         public List<String> PagesLink { get; set; } = new List<string>();
@@ -53,7 +53,7 @@ namespace WebRazor.Pages.Admin.Customer
 
         public async Task<IActionResult> OnGetActive(string? id)
         {
-            Models.Customer customer = await dbContext.Customers.FirstOrDefaultAsync(p => p.CustomerId == id);
+            DoggoShopClient.Models.Customer customer = await dbContext.Customers.FirstOrDefaultAsync(p => p.CustomerId == id);
             if (customer != null)
             {
                 customer.Active = !customer.Active;

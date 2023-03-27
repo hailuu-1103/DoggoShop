@@ -24,7 +24,7 @@
         @foreach (var item in Model.HotProducts)
         {
             <div class="product">
-                <a asp-page="./Product/Detail" asp-route-id="@item.ProductId"><img src="img/1.jpg" /></a>
+                <a asp-page="./Product/Detail" asp-route-id="@item.ProductId"><img src="@item.Image" /></a>
                 <div class="name"><a asp-page="./Product/Detail" asp-route-id="@item.ProductId">@item.ProductName</a></div>
                 <div class="price">@item.UnitPrice</div>
                 <div><a asp-page="/Order/Index" asp-page-handler="Add" asp-route-id="@item.ProductId">Buy now</a></div>
@@ -38,7 +38,7 @@
         @foreach (var item in Model.BestSaleProducts)
         {
             <div class="product">
-                <a asp-page="./Product/Detail" asp-route-id="@item.ProductId"><img src="img/1.jpg" /></a>
+                <a asp-page="./Product/Detail" asp-route-id="@item.ProductId"><img src="@item.Image" /></a>
                 <div class="name"><a asp-page="./Product/Detail" asp-route-id="@item.ProductId">@item.ProductName</a></div>
                 <div class="price">@item.UnitPrice</div>
                 <div><a asp-page="/Order/Index" asp-page-handler="Add" asp-route-id="@item.ProductId">Buy now</a></div>
@@ -52,7 +52,7 @@
         @foreach (var item in Model.NewProducts)
         {
             <div class="product">
-                <a asp-page="./Product/Detail" asp-route-id="@item.ProductId"><img src="img/1.jpg" /></a>
+                <a asp-page="./Product/Detail" asp-route-id="@item.ProductId"><img src="@item.Image" /></a>
                 <div class="name"><a asp-page="./Product/Detail" asp-route-id="@item.ProductId">@item.ProductName</a></div>
                 <div class="price">@item.UnitPrice</div>
                 <div><a asp-page="/Order/Index" asp-page-handler="Add" asp-route-id="@item.ProductId">Buy now</a></div>

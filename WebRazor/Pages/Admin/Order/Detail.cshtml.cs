@@ -1,16 +1,16 @@
+using DoggoShopClient.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Admin.Order
 {
     [Authorize(Roles = "Employee")]
     public class DetailModel : PageModel
     {
-        public Models.Order Order { get; set;}
+        public DoggoShopClient.Models.Order Order { get; set;}
 
         private readonly PRN221DBContext dbContext;
 

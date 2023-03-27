@@ -1,3 +1,4 @@
+using DoggoShopClient.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -5,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
 using WebRazor.Materials;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Product
 {
@@ -14,7 +14,7 @@ namespace WebRazor.Pages.Product
         private HttpClient client;
         private string ProductApiUrl;
         private string CategoryApiUrl;
-        [BindProperty] public List<Models.Product> Products { get; set; } = new List<Models.Product>();
+        [BindProperty] public List<DoggoShopClient.Models.Product> Products { get; set; } = new List<DoggoShopClient.Models.Product>();
 
         [BindProperty] public List<Category> Categories { get; set; }
 
@@ -78,15 +78,15 @@ namespace WebRazor.Pages.Product
             ProductApiUrl = "https://localhost:5000/api/Product/getActiveProductByCategory/" + id;
             var response = await client.GetAsync(ProductApiUrl);
             var data = await response.Content.ReadAsStringAsync();
-            var list = JsonSerializer.Deserialize<List<Models.Product>>(data, options);
+            var list = JsonSerializer.Deserialize<List<DoggoShopClient.Models.Product>>(data, options);
 
             switch (Order)
             {
                 case "Asc":
-                    list = (List<Models.Product>?)list.OrderBy(p => p.UnitPrice);
+                    list = (List<DoggoShopClient.Models.Product>?)list.OrderBy(p => p.UnitPrice);
                     break;
                 case "Desc":
-                    list = (List<Models.Product>?)list.OrderByDescending(p => p.UnitPrice);
+                    list = (List<DoggoShopClient.Models.Product>?)list.OrderByDescending(p => p.UnitPrice);
                     break;
             }
 

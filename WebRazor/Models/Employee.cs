@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WebRazor.Models
+namespace DoggoShopClient.Models
 {
     public partial class Employee
     {
@@ -20,7 +20,7 @@ namespace WebRazor.Models
         public DateTime? BirthDate { get; set; }
         public DateTime? HireDate { get; set; }
         public string? Address { get; set; }
-        public bool? Active { get; set; }
+        public bool Active { get; set; }
 
         public virtual Department? Department { get; set; }
         public virtual ICollection<Account> Accounts { get; set; }

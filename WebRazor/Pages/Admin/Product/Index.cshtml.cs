@@ -1,4 +1,5 @@
 using ClosedXML.Excel;
+using DoggoShopClient.Models;
 using ExcelDataReader;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +10,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Security.Claims;
 using WebRazor.Materials;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Admin.Product
 {
@@ -26,8 +26,8 @@ namespace WebRazor.Pages.Admin.Product
         [Required(ErrorMessage = "File is required")]
         public IFormFile FileUpload { get; set; }
 
-        public List<Models.Product> Products;
-        public List<Models.Category> Categories;
+        public List<DoggoShopClient.Models.Product> Products;
+        public List<DoggoShopClient.Models.Category> Categories;
         private readonly PRN221DBContext dbContext;
         private int perPage = 10;
         private IWebHostEnvironment _hostingEnvironment;
@@ -122,7 +122,7 @@ namespace WebRazor.Pages.Admin.Product
                     DataTable dtRecords = ds.Tables[0];
                     for (int i = 0; i < dtRecords.Rows.Count; i++)
                     {
-                        Models.Product product = new Models.Product();
+                        DoggoShopClient.Models.Product product = new DoggoShopClient.Models.Product();
                         product.ProductName = Convert.ToString(dtRecords.Rows[i][0]);
                         product.CategoryId = dtRecords.Rows[i][1].Equals("NULL") ? null : Convert.ToInt32(dtRecords.Rows[i][1]);
                         product.QuantityPerUnit = dtRecords.Rows[i][2].Equals("NULL") ? null : Convert.ToString(dtRecords.Rows[i][2]);
@@ -172,7 +172,7 @@ namespace WebRazor.Pages.Admin.Product
                 ws.Range("A4:G4").Style.Fill.BackgroundColor = XLColor.Alizarin;
 
                 int i = 5;
-                foreach (Models.Product product in Products)
+                foreach (DoggoShopClient.Models.Product product in Products)
                 {
                     ws.Cell(i, 1).Value = product.ProductId.ToString();
                     ws.Cell(i, 2).Value = product.ProductName;

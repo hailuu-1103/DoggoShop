@@ -1,3 +1,4 @@
+using DoggoShopClient.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -5,7 +6,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
 using WebRazor.Materials;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Order
 {
@@ -20,8 +20,8 @@ namespace WebRazor.Pages.Order
         }
 
         [BindProperty]
-        public Models.Account Auth { get; set; }
-        public List<Models.Order> Orders { get; set; }
+        public DoggoShopClient.Models.Account Auth { get; set; }
+        public List<DoggoShopClient.Models.Order> Orders { get; set; }
 
         private int perPage = 5;
 

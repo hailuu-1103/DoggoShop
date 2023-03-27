@@ -1,4 +1,5 @@
 using ClosedXML.Excel;
+using DoggoShopClient.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
@@ -6,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Data.SqlTypes;
 using System.Security.Claims;
 using WebRazor.Materials;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Admin.Order
 {
@@ -15,7 +15,7 @@ namespace WebRazor.Pages.Admin.Order
     {
         private readonly PRN221DBContext dbContext;
         [FromQuery(Name = "page")] public int Page { get; set; } = 1;
-        [BindProperty] public List<Models.Order> Orders { get; set; }
+        [BindProperty] public List<DoggoShopClient.Models.Order> Orders { get; set; }
         public List<String> PagesLink { get; set; } = new List<string>();
 
         [FromQuery(Name = "txtStartOrderDate")] public DateTime StartDate { get; set; }
@@ -91,7 +91,7 @@ namespace WebRazor.Pages.Admin.Order
         public async Task<IActionResult> OnGetCancel(int? id, string target)
         {
 
-            Models.Order order = await dbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == id);
+            DoggoShopClient.Models.Order order = await dbContext.Orders.FirstOrDefaultAsync(o => o.OrderId == id);
 
             await LoadData();
 
@@ -166,7 +166,7 @@ namespace WebRazor.Pages.Admin.Order
                 ws.Columns().AdjustToContents();
 
                 int i = 5;
-                foreach (Models.Order order in Orders)
+                foreach (DoggoShopClient.Models.Order order in Orders)
                 {
                     ws.Cell(i, 1).Value = order.OrderId.ToString();
                     ws.Cell(i, 2).Value = format(order.OrderDate);

@@ -1,4 +1,5 @@
 using DoggoShopAPI.DTO;
+using DoggoShopClient.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +8,6 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Json;
 using WebRazor.Materials;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Account
 {
@@ -27,7 +27,7 @@ namespace WebRazor.Pages.Account
         public Customer Customer { get; set; }
 
         [BindProperty]
-        public Models.Account Account { get; set; }
+        public DoggoShopClient.Models.Account Account { get; set; }
 
         [BindProperty, Required(ErrorMessage = "Re-password is required")]
         public string RePassword { get; set; }

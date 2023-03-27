@@ -16,7 +16,7 @@ namespace WebRazor.Pages.Account
         private HttpClient client;
         private string AccountApiUrl = "";
         [BindProperty]
-        public Models.Account? Auth { get; set; }
+        public DoggoShopClient.Models.Account? Auth { get; set; }
 
         public EditModel()
         {
@@ -33,7 +33,7 @@ namespace WebRazor.Pages.Account
             {
                 PropertyNameCaseInsensitive = true
             };
-            Auth = JsonSerializer.Deserialize<Models.Account>(data, options);
+            Auth = JsonSerializer.Deserialize<DoggoShopClient.Models.Account>(data, options);
 
             if (Auth == null)
             {

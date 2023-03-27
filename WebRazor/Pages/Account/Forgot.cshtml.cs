@@ -1,18 +1,18 @@
+using DoggoShopClient.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using WebRazor.Materials;
-using WebRazor.Models;
 
 namespace WebRazor.Pages.Account
 {
     public class ForgotModel : PageModel
     {
+        private EmailSenderService emailSender;
         private HttpClient client;
         private string AccountApiUrl = "";
         public ForgotModel()
         {
+            this.emailSender = new EmailSenderService();
             this.client = new HttpClient();
         }
 
@@ -34,7 +34,7 @@ namespace WebRazor.Pages.Account
             {
                 PropertyNameCaseInsensitive = true
             };
-            Models.Account account = JsonSerializer.Deserialize<Models.Account>(data, options);
+            DoggoShopClient.Models.Account account = JsonSerializer.Deserialize<DoggoShopClient.Models.Account>(data, options);
 
             if (account == null)
             {
@@ -42,13 +42,12 @@ namespace WebRazor.Pages.Account
                 return Page();
             }
 
-            String password = Faker.Name.First() + Faker.RandomNumber.Next();
+            /*String password = Faker.Name.First() + Faker.RandomNumber.Next();
             Mail mail = new Mail();
-            mail.SendEmailResetAsync(email, password);
-
-            ViewData["success"] = "New password was send to your email";
-
-            account.Password = HashPassword.Hash(password);
+            mail.SendEmailResetAsync(email, password);*/
+            await emailSender.SendEmailAsync("hailhhe153224@fpt.edu.vn", "Hello", "Hello");
+            ViewData["success"] = "New password was send to your email ";
+            /*account.Password = HashPassword.Hash(password);*/
             return Page();
         }
     }

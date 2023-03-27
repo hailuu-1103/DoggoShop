@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace WebRazor.Models
+namespace DoggoShopClient.Models
 {
     public partial class PRN221DBContext : DbContext
     {
@@ -30,7 +30,7 @@ namespace WebRazor.Models
             if (!optionsBuilder.IsConfigured)
             {
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=HAILUU; database=PRN221DB; user=sa; password=123");
+                optionsBuilder.UseSqlServer("server =HAILUU; database = PRN221DB;uid=sa;pwd=123; TrustServerCertificate=True");
             }
         }
 
@@ -91,10 +91,6 @@ namespace WebRazor.Models
                     .HasColumnName("CustomerID")
                     .IsFixedLength();
 
-                entity.Property(e => e.Active)
-                    .IsRequired()
-                    .HasDefaultValueSql("((1))");
-
                 entity.Property(e => e.Address).HasMaxLength(60);
 
                 entity.Property(e => e.CompanyName).HasMaxLength(40);
@@ -122,10 +118,6 @@ namespace WebRazor.Models
                 entity.HasIndex(e => e.LastName, "LastName");
 
                 entity.Property(e => e.EmployeeId).HasColumnName("EmployeeID");
-
-                entity.Property(e => e.Active)
-                    .IsRequired()
-                    .HasDefaultValueSql("((1))");
 
                 entity.Property(e => e.Address).HasMaxLength(60);
 
@@ -209,8 +201,7 @@ namespace WebRazor.Models
 
             modelBuilder.Entity<OrderDetail>(entity =>
             {
-                entity.HasKey(e => new { e.OrderId, e.ProductId })
-                    .HasName("PK_Order_Details");
+                entity.HasKey(e => new { e.OrderId, e.ProductId });
 
                 entity.ToTable("Order Details");
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace WebRazor.Models
+namespace DoggoShopClient.Models
 {
     public partial class Category
     {

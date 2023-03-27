@@ -3,8 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Text.Json;
-using WebRazor.Models;
-
+using DoggoShopClient.Models;
 namespace WebRazor.Pages.Product
 {
     public class DetailModel : PageModel
@@ -17,7 +16,7 @@ namespace WebRazor.Pages.Product
         }
 
         [BindProperty]
-        public Models.Product Product { get; set; }
+        public DoggoShopClient.Models.Product Product { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
@@ -39,7 +38,7 @@ namespace WebRazor.Pages.Product
             {
                 PropertyNameCaseInsensitive = true
             };
-            Product =  JsonSerializer.Deserialize<Models.Product>(data, options);
+            Product =  JsonSerializer.Deserialize<DoggoShopClient.Models.Product>(data, options);
 
             if (Product == null)
             {
@@ -69,7 +68,7 @@ namespace WebRazor.Pages.Product
             {
                 PropertyNameCaseInsensitive = true
             };
-            Product = JsonSerializer.Deserialize<Models.Product>(data, options);
+            Product = JsonSerializer.Deserialize<DoggoShopClient.Models.Product>(data, options);
 
             if (Product == null)
             {
