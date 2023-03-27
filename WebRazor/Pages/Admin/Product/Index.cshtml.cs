@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Data;
 using System.Security.Claims;
+using System.Text.Json;
 using WebRazor.Materials;
 
 namespace WebRazor.Pages.Admin.Product
@@ -16,6 +17,8 @@ namespace WebRazor.Pages.Admin.Product
     [Authorize(Roles = "Employee")]
     public class IndexModel : PageModel
     {
+        private HttpClient client = new HttpClient();
+        private string CategoryApiUrl;
         [FromQuery(Name = "page")] public int Page { get; set; } = 1;
         [FromQuery(Name = "txtSearch")] public string Search { get; set; } = "";
         [FromQuery(Name = "categoryId")] public int CatId { get; set; } = 0;
@@ -27,7 +30,7 @@ namespace WebRazor.Pages.Admin.Product
         public IFormFile FileUpload { get; set; }
 
         public List<DoggoShopClient.Models.Product> Products;
-        public List<DoggoShopClient.Models.Category> Categories;
+        public List<Category> Categories;
         private readonly PRN221DBContext dbContext;
         private int perPage = 10;
         private IWebHostEnvironment _hostingEnvironment;
@@ -91,10 +94,7 @@ namespace WebRazor.Pages.Admin.Product
 
         public async Task<bool> ReadFile()
         {
-            if (!ModelState.IsValid)
-            {
-                return false;
-            }
+            
             DataSet ds = new DataSet();
             IExcelDataReader reader = null;
             Stream FileStream = null;
@@ -116,21 +116,33 @@ namespace WebRazor.Pages.Admin.Product
                     ds = reader.AsDataSet();
                     reader.Close();
                 }
-
+                CategoryApiUrl = "";
                 if (ds != null && ds.Tables.Count > 0)
                 {
                     DataTable dtRecords = ds.Tables[0];
-                    for (int i = 0; i < dtRecords.Rows.Count; i++)
+                    for (int i = 1; i < dtRecords.Rows.Count; i++)
                     {
+                        var productId = dtRecords.Rows[i][0];
                         DoggoShopClient.Models.Product product = new DoggoShopClient.Models.Product();
-                        product.ProductName = Convert.ToString(dtRecords.Rows[i][0]);
-                        product.CategoryId = dtRecords.Rows[i][1].Equals("NULL") ? null : Convert.ToInt32(dtRecords.Rows[i][1]);
-                        product.QuantityPerUnit = dtRecords.Rows[i][2].Equals("NULL") ? null : Convert.ToString(dtRecords.Rows[i][2]);
-                        product.UnitPrice = dtRecords.Rows[i][3].Equals("NULL") ? null : Convert.ToDecimal(dtRecords.Rows[i][3]);
+                        product.ProductName = Convert.ToString(dtRecords.Rows[i][1]);
+                        CategoryApiUrl = "https://localhost:5000/api/Category/getCategoryByName/" + dtRecords.Rows[i][5];
+                        var response = await client.GetAsync(CategoryApiUrl);
+                        var data = await response.Content.ReadAsStringAsync();
+                        var options = new JsonSerializerOptions
+                        {
+                            PropertyNameCaseInsensitive = true
+                        };
+                        var category = JsonSerializer.Deserialize<Category>(data, options);
+                        product.CategoryId = dtRecords.Rows[i][5].Equals("NULL") ? null : category.CategoryId;
+                        product.QuantityPerUnit = dtRecords.Rows[i][3].Equals("NULL") ? null : Convert.ToString(dtRecords.Rows[i][3]);
+                        product.UnitPrice = dtRecords.Rows[i][2].Equals("NULL") ? null : Convert.ToDecimal(dtRecords.Rows[i][2]);
                         product.UnitsInStock = dtRecords.Rows[i][4].Equals("NULL") ? null : Convert.ToInt16(dtRecords.Rows[i][4]);
-                        product.Discontinued = Convert.ToBoolean(dtRecords.Rows[i][5]);
+                        product.Discontinued = Convert.ToBoolean(dtRecords.Rows[i][6]);
 
-                        await dbContext.Products.AddAsync(product);
+                        if(dbContext.Products.FirstOrDefault(p => !p.ProductId.Equals(productId)) == null)
+                        {
+                            await dbContext.Products.AddAsync(product);
+                        }
                     }
 
                     await dbContext.SaveChangesAsync();
@@ -154,24 +166,18 @@ namespace WebRazor.Pages.Admin.Product
             using (var workbook = new XLWorkbook())
             {
                 var ws = workbook.Worksheets.Add("Sheet1");
-                ws.Range("A1:G1").Merge();
-                ws.Cell(1, 1).Value = "Report";
-                ws.Cell(1, 1).Style.Font.Bold = true;
-                ws.Cell(1, 1).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
-                ws.Cell(1, 1).Style.Font.FontSize = 30;
-
                 //Header
-                ws.Cell(4, 1).Value = "ProductID";
-                ws.Cell(4, 2).Value = "ProductName";
-                ws.Cell(4, 3).Value = "UnitPrice";
-                ws.Cell(4, 4).Value = "Unit";
-                ws.Cell(4, 5).Value = "UnitInStock";
-                ws.Cell(4, 6).Value = "Category";
-                ws.Cell(4, 7).Value = "Discontinued";
+                ws.Cell(1, 1).Value = "ProductID";
+                ws.Cell(1, 2).Value = "ProductName";
+                ws.Cell(1, 3).Value = "UnitPrice";
+                ws.Cell(1, 4).Value = "Unit";
+                ws.Cell(1, 5).Value = "UnitInStock";
+                ws.Cell(1, 6).Value = "Category";
+                ws.Cell(1, 7).Value = "Discontinued";
 
-                ws.Range("A4:G4").Style.Fill.BackgroundColor = XLColor.Alizarin;
+                ws.Range("A1:G1").Style.Fill.BackgroundColor = XLColor.Alizarin;
 
-                int i = 5;
+                int i = 2;
                 foreach (DoggoShopClient.Models.Product product in Products)
                 {
                     ws.Cell(i, 1).Value = product.ProductId.ToString();
@@ -185,10 +191,10 @@ namespace WebRazor.Pages.Admin.Product
                 }
                 i--;
 
-                ws.Cells("A4:G" + i).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
-                ws.Cells("A4:G" + i).Style.Border.TopBorder = XLBorderStyleValues.Thin;
-                ws.Cells("A4:G" + i).Style.Border.LeftBorder = XLBorderStyleValues.Thin;
-                ws.Cells("A4:G" + i).Style.Border.RightBorder = XLBorderStyleValues.Thin;
+                ws.Cells("A1:G" + i).Style.Border.BottomBorder = XLBorderStyleValues.Thin;
+                ws.Cells("A1:G" + i).Style.Border.TopBorder = XLBorderStyleValues.Thin;
+                ws.Cells("A1:G" + i).Style.Border.LeftBorder = XLBorderStyleValues.Thin;
+                ws.Cells("A1:G" + i).Style.Border.RightBorder = XLBorderStyleValues.Thin;
 
                 using (var stream = new MemoryStream())
                 {

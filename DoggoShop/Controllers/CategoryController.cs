@@ -14,5 +14,11 @@ namespace DoggoShopAPI.Controllers
             var categories = context.Categories.ToList();
             return Ok(categories);
         }
+        [HttpGet("getCategoryByName/{name}")]
+        public IActionResult GetCategoryById(string name)
+        {
+            var category = context.Categories.FirstOrDefault(cat => cat.CategoryName.Equals(name));
+            return Ok(category);
+        }
     }
 }

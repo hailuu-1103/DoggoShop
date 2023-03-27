@@ -8,6 +8,7 @@ using iText.Layout;
 using System.Security.Claims;
 using System.Text;
 using DoggoShopClient.Models;
+using DocumentFormat.OpenXml.Drawing;
 
 namespace WebRazor.Pages.Cart
 {
@@ -272,7 +273,14 @@ namespace WebRazor.Pages.Cart
                     }
 
                     order.Freight = Freight;
-
+                    OrdersApiUrl = "https://localhost:5000/api/Order/updateFreight/" + order.OrderId;
+                    var orderJson = JsonSerializer.Serialize(order);
+                    var data = new StringContent(orderJson, Encoding.UTF8, "application/json");
+                    var response = await client.PutAsync(OrdersApiUrl, data);
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        ViewData["fail"] = "Something were wrong " + response.StatusCode;
+                    }
                     ViewData["success"] = "Order successfull";
                     listIdCart.Clear();
                     HttpContext.Session.Remove("cart");
